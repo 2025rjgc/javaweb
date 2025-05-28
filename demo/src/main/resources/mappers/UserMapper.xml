@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+    <!-- 完整映射 User 类的所有字段 -->
+    <resultMap id="UserResultMap" type="com.example.demo.pojo.User">
+        <id column="user_id" property="userId"/>
+        <result column="role" property="role"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="ID_num" property="ID_num"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="signature" property="signature"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 根据用户名和密码查询用户（用于登录） -->
+    <select id="findByUsernameAndPassword" resultMap="UserResultMap">
+        SELECT * FROM user WHERE username = #{userName} AND password = #{password}
+    </select>
+
+    <!-- 查询用户 -->
+    <select id="find" resultMap="UserResultMap">
+        SELECT * FROM user
+        <where>
+            <if test="username != null">
+                AND username = #{username}
+            </if>
+            <if test="password != null">
+                AND password = #{password}
+            </if>
+            <if test="ID_num != null">
+                AND ID_num = #{ID_num}
+            </if>
+            <if test="major != null">
+                AND major = #{major}
+            </if>
+            <if test="email != null">
+                AND email = #{email}
+            </if>
+            <if test="phone != null">
+                AND phone= #{phone}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入新用户 -->
+    <insert id="insert">
+        INSERT INTO user (
+            role, username, password, ID_num, email, phone, signature
+        ) VALUES (
+                     #{role}, #{username}, #{password}, #{ID_num}, #{email}, #{phone}, #{signature}
+                 )
+    </insert>
+
+    <!-- 查询所有用户 -->
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT * FROM user
+    </select>
+
+    <!-- 分页查询用户 -->
+    <select id="findAllByPage" resultMap="UserResultMap">
+        SELECT * FROM user LIMIT #{start}, #{pageSize}
+    </select>
+
+    <!-- 更新用户信息（可选字段） -->
+    <update id="updateUserInfo">
+        UPDATE user
+        SET
+        <if test="user.password != null">password = #{user.password},</if>
+        <if test="user.email != null">email = #{user.email},</if>
+        <if test="user.phone != null">phone = #{user.phone},</if>
+        <if test="user.ID_num != null">ID_num = #{user.ID_num},</if>
+        <if test="user.major != null">major = #{user.major},</if>
+        <if test="user.avatar != null">avatar = #{user.avatar},</if>
+        <if test="user.signature != null">signature = #{user.signature},</if>
+        update_time = NOW()
+        WHERE username = #{username}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteUser">
+        DELETE FROM user WHERE username = #{username}
+    </delete>
+
+</mapper>

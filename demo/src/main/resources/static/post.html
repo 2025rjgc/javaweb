@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>书评测试页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            background: #2d2d2d;
+            color: #00ff80;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>📘 发布书评</h2>
+    <div class="section">
+        <label for="bookIdForPublish">书籍ID:</label>
+        <input type="text" id="bookIdForPublish"/>
+
+        <label for="postTitle">标题:</label>
+        <input type="text" id="postTitle"/>
+
+        <label for="postContent">内容:</label>
+        <input type="text" id="postContent"/>
+
+        <label for="postImg">封面URL:</label>
+        <input type="text" id="postImg"/>
+
+        <button onclick="publishPost()">发布书评</button>
+    </div>
+
+    <h2>📚 获取书籍所有书评</h2>
+    <div class="section">
+        <label for="bookIdForGet">书籍ID:</label>
+        <input type="text" id="bookIdForGet"/>
+        <button onclick="getBookPosts()">查询书评</button>
+    </div>
+
+    <h2>🗑️ 删除书评</h2>
+    <div class="section">
+        <label for="postIdForDelete">帖子ID:</label>
+        <input type="text" id="postIdForDelete"/>
+        <button onclick="deletePost()">删除书评</button>
+    </div>
+
+    <h2>✏️ 更新书评</h2>
+    <div class="section">
+        <label for="postIdForUpdate">帖子ID:</label>
+        <input type="text" id="postIdForUpdate"/>
+
+        <label for="updatedTitle">新标题:</label>
+        <input type="text" id="updatedTitle"/>
+
+        <label for="updatedContent">新内容:</label>
+        <input type="text" id="updatedContent"/>
+
+        <label for="updatedPostImg">新封面URL:</label>
+        <input type="text" id="updatedPostImg"/>
+
+        <button onclick="updatePost()">更新书评</button>
+    </div>
+
+    <h2>🔍 查看书评详情</h2>
+    <div class="section">
+        <label for="postIdForGetDetail">帖子ID:</label>
+        <input type="text" id="postIdForGetDetail"/>
+        <button onclick="getPostDetail()">查看详情</button>
+    </div>
+
+    <h3>📤 输出结果:</h3>
+    <pre id="output"></pre>
+
+</div>
+
+<script>
+    async function publishPost() {
+        const response = await fetch('/api/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: 1,
+                bookID: document.getElementById('bookIdForPublish').value,
+                title: document.getElementById('postTitle').value,
+                content: document.getElementById('postContent').value,
+                PostImg: document.getElementById('postImg').value
+            })
+        });
+        const result = await response.json();
+        alert(JSON.stringify(result));
+    }
+
+    async function getBookPosts() {
+        const bookId = document.getElementById('bookIdForGet').value;
+        const response = await fetch(`/api/book/${bookId}/posts`);
+        const result = await response.json();
+        document.getElementById('output').innerText = JSON.stringify(result);
+    }
+
+    async function deletePost() {
+        const postId = document.getElementById('postIdForDelete').value;
+        const response = await fetch(`/api/post/${postId}`, {method: 'DELETE'});
+        const result = await response.json();
+        alert(JSON.stringify(result));
+    }
+
+    async function updatePost() {
+        const response = await fetch('/api/post', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                postId: document.getElementById('postIdForUpdate').value,
+                title: document.getElementById('updatedTitle').value,
+                content: document.getElementById('updatedContent').value,
+                PostImg: document.getElementById('updatedPostImg').value
+            })
+        });
+        const result = await response.json();
+        alert(JSON.stringify(result));
+    }
+
+    async function getPostDetail() {
+        const postId = document.getElementById('postIdForGetDetail').value;
+        const response = await fetch(`/api/post/${postId}`);
+        const result = await response.json();
+        document.getElementById('output').innerText = JSON.stringify(result);
+    }
+</script>
+
+</body>
+</html>

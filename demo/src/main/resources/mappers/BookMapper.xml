@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookMapper">
+
+    <!-- 映射结果集 -->
+    <resultMap id="Book" type="com.example.demo.pojo.Book">
+        <id column="book_id" property="bookId"/>
+        <result column="book_name" property="bookName"/>
+        <result column="book_pre" property="bookPre"/>
+        <result column="author" property="author"/>
+        <result column="publisher" property="publisher"/>
+        <result column="genre" property="genre"/>
+        <result column="book_img" property="bookImg"/>
+        <result column="book_url" property="bookUrl"/>
+        <result column="created_at" property="created_at"/>
+        <result column="updated_at" property="updated_at"/>
+    </resultMap>
+
+    <!-- 查询所有 -->
+    <select id="findAll" resultMap="Book">
+        SELECT * FROM book
+    </select>
+
+    <!-- 删除 -->
+    <delete id="delete">
+        DELETE FROM book WHERE book_id = #{id}
+    </delete>
+
+    <!-- 添加 -->
+    <insert id="addBook" parameterType="com.example.demo.pojo.Book" useGeneratedKeys="true" keyProperty="bookId">
+        INSERT INTO book (
+            book_name, book_pre, author, publisher, genre, book_img, book_url
+        ) VALUES (
+                     #{bookName}, #{bookPre}, #{author}, #{publisher}, #{genre}, #{bookImg}, #{bookUrl}
+                 )
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.example.demo.pojo.Book">
+        UPDATE book
+        <set>
+            <if test="bookName != null">book_name = #{bookName},</if>
+            <if test="bookPre != null">book_pre = #{bookPre},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="publisher != null">publisher = #{publisher},</if>
+            <if test="genre != null">genre = #{genre},</if>
+            <if test="bookImg != null">book_img = #{bookImg},</if>
+            <if test="bookUrl != null">book_url = #{bookUrl},</if>
+            <if test="updated_at != null">updated_at = #{updated_at}</if>
+        </set>
+        WHERE book_id = #{bookId}
+    </update>
+
+    <!-- 多条件查询 -->
+    <select id="search" resultMap="Book">
+        SELECT * FROM book
+        <where>
+            <if test="bookId != 0">
+                AND book_id LIKE CONCAT('%', #{bookId}, '%')
+            </if>
+            <if test="bookName != null and !bookName.isEmpty()">
+                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+            <if test="bookPre != null and !bookPre.isEmpty()">
+                AND book_pre LIKE CONCAT('%', #{bookPre}, '%')
+            </if>
+            <if test="author != null and !author.isEmpty()">
+                AND author LIKE CONCAT('%', #{author}, '%')
+            </if>
+            <if test="publisher != null and !publisher.isEmpty()">
+                AND publisher LIKE CONCAT('%', #{publisher}, '%')
+            </if>
+            <if test="genre != null and !genre.isEmpty()">
+                AND genre LIKE CONCAT('%', #{genre}, '%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
