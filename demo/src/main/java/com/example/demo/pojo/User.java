@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    private int userId;  // 用户id
-    private int role;    // 用户权限(0-普通用户, 1-导师, 2-管理员',)
+    private Integer userId;  // 用户id
+    private Integer role;    // 用户权限(0-普通用户, 1-导师, 2-管理员',)
     private String username;    // 用户名
     private String password;    // 用户密码
-    private String ID_num;  // 学工号
+    private String personId;  // 学工号
     private String major;   // 专业
     private String avatar; // 用户头像
     private String email;   // 用户邮箱

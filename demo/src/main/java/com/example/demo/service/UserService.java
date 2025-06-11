@@ -2,7 +2,9 @@ package com.example.demo.service;
 
 
 import com.example.demo.pojo.User;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -16,6 +18,10 @@ public interface UserService {
     boolean updateUserInfo(User user);
 
     boolean deleteUser(String username);
+
+    boolean  updateUserImage(MultipartFile file, String filename);
+
+    byte[] getUserImage(String fileName) throws IOException;
 
     List<User> getUserInfo(User user);
 }

@@ -3,8 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.pojo.Book;
 import com.example.demo.pojo.Result;
 import com.example.demo.service.BookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
@@ -12,81 +15,172 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * 图书信息控制器，提供图书的增删改查及静态资源访问功能。
+ */
 @RestController
+@RequestMapping("/book")
 public class BookController {
+
+    private static final Logger logger = LoggerFactory.getLogger(BookController.class);
+
     private final BookService bookService;
+
     @Autowired
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
-    @GetMapping("/book")
-    /*获取book表全部数据并返回给前端*/
-    public Result list(){
-        System.out.println("book 查询全部数据");
+    /**
+     * 获取所有图书信息。
+     *
+     * @return 返回图书列表
+     */
+    @GetMapping("")
+    public Result list() {
+        logger.info("获取所有图书信息");
         List<Book> books = bookService.FindAll();
         return Result.success(books);
     }
 
-    /*多条件查询*/
-    @PostMapping("/book/search")
+    /**
+     * 多条件查询图书信息。
+     *
+     * @param book 查询条件对象
+     * @return 匹配的图书列表
+     */
+    @PostMapping("/search")
     public Result search(@RequestBody Book book) {
-        System.out.println("book 多条件查询:" + book);
+        logger.info("多条件查询图书: {}", book);
         List<Book> books = bookService.search(book);
         return Result.success(books);
     }
 
-    /*删除指定book*/
-    @DeleteMapping("/book/{id}")
+    /**
+     * 删除指定ID的图书。
+     *
+     * @param id 要删除的图书ID
+     * @return 删除结果
+     */
+    @DeleteMapping("/{id}")
     public Result delete(@PathVariable String id) {
-        System.out.println("book 删除指定数据:" + id);
-        bookService.delete(id);
-        return Result.success();
+        logger.info("尝试删除图书 ID: {}", id);
+        if (id == null || id.isEmpty()) {
+            logger.warn("无效的图书ID");
+            return Result.error("图书ID不能为空");
+        }
+        try {
+            bookService.delete(id);
+            return Result.success("删除成功");
+        } catch (Exception e) {
+            logger.error("删除图书失败", e);
+            return Result.error("删除失败：" + e.getMessage());
+        }
     }
 
-    /*增加新用户*/
-    @PostMapping("/book/add")
+    /**
+     * 新增一本图书。
+     *
+     * @param book 要新增的图书对象
+     * @return 新增结果
+     */
+    @PostMapping("/add")
     public Result addBook(@RequestBody Book book) {
-        System.out.println("book 添加数据:" + book);
-        bookService.addBook(book);
-        return Result.success();
+        logger.info("添加新图书: {}", book);
+        if (book == null) {
+            logger.warn("图书对象为空");
+            return Result.error("图书信息不能为空");
+        }
+        try {
+            bookService.addBook(book);
+            return Result.success("添加成功");
+        } catch (Exception e) {
+            logger.error("添加图书失败", e);
+            return Result.error("添加失败：" + e.getMessage());
+        }
     }
 
-    /*修改*/
-    @PostMapping("/book")
+    /**
+     * 修改已有图书信息。
+     *
+     * @param book 要修改的图书对象
+     * @return 修改结果
+     */
+    @PostMapping("")
     public Result update(@RequestBody Book book) {
-        System.out.println("book 修改数据:" + book);
-        bookService.update(book);
-        return Result.success();
+        logger.info("更新图书信息: {}", book);
+        if (book == null || book.getBookId() == null) {
+            logger.warn("图书ID为空");
+            return Result.error("图书ID不能为空");
+        }
+        try {
+            bookService.update(book);
+            return Result.success("更新成功");
+        } catch (Exception e) {
+            logger.error("更新图书失败", e);
+            return Result.error("更新失败：" + e.getMessage());
+        }
     }
 
+    /**
+     * 获取图书封面图片。
+     *
+     * @param fileName 图片文件名
+     * @return 返回图片字节流
+     */
+    @GetMapping("/image/{fileName:.+}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
+        try {
+            ClassPathResource resource = new ClassPathResource("images/book/" + fileName);
+            if (!resource.exists()) {
+                logger.warn("图片文件不存在: {}", fileName);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .body("文件不存在".getBytes(StandardCharsets.UTF_8));
+            }
+
+            byte[] imageBytes = resource.getInputStream().readAllBytes();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+
+        } catch (Exception e) {
+            logger.error("读取图片文件失败: {}", fileName, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(("读取文件出错: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    /**
+     * 获取图书介绍文本内容。
+     *
+     * @param fileName 文本文件名
+     * @return 返回文本内容字符串
+     */
     @GetMapping("/txt/{fileName:.+}")
     public Result getFile(@PathVariable String fileName) {
         try {
-            // 尝试从classpath下的txt目录加载文件
             ClassPathResource resource = new ClassPathResource("txt/" + fileName);
             if (!resource.exists()) {
-                // 如果文件不存在
+                logger.warn("文本文件不存在: {}", fileName);
                 return Result.error("文件不存在");
             }
 
-            // 使用UTF-8编码读取文件内容
             BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder contentBuilder = new StringBuilder();
-            String currentLine;
+            String line;
 
-            while ((currentLine = reader.readLine()) != null) {
-                contentBuilder.append(currentLine).append("\n");
+            while ((line = reader.readLine()) != null) {
+                contentBuilder.append(line).append("\n");
             }
-            String content = contentBuilder.toString();
 
-            // 返回文件内容
-            return Result.success(content);
+            return Result.success(contentBuilder.toString());
 
         } catch (Exception e) {
-            // 处理异常情况，比如IO错误等
-            return Result.error("Error reading file: " + e.getMessage());
+            logger.error("读取文本文件失败: {}", fileName, e);
+            return Result.error("读取文件失败：" + e.getMessage());
         }
     }
 }
-

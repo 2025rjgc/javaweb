@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Book {
-    private int bookId;
+    private Integer bookId;
     private String bookName;    // 书名
     private String bookPre; // 简介
     private String author;  // 作者

@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 // 评论
 public class Comment {
-    private int commentId;
-    private int userId;
-    private int postId;
+    private Integer commentId;
+    private Integer userId;
+    private Integer postId;
     private String comment;
     private LocalDateTime createTime;
 }

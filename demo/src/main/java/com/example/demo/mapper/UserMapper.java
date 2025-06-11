@@ -10,16 +10,22 @@ import java.util.List;
 public interface UserMapper {
     // 根据用户名和密码查询用户
     List<User> findByUsernameAndPassword(@Param("userName") String userName, @Param("password") String password);
+
     // 多条件查询用户
     List<User> find(User user);
+
     // 添加用户
     void insert(User user);
+
     // 查询所有用户
     List<User> findAll();
+
     // 分页查询用户
     List<User> findAllByPage(@Param("start") int start, @Param("pageSize") int pageSize);
+
     // 修改用户信息
-    int updateUserInfo(@Param("username") String username, @Param("user") User user);
+    int updateUserInfo(@Param("user") User user);
+
     // 删除用户
     int deleteUser(@Param("username") String username);
 }

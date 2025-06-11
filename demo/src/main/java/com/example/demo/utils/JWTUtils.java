@@ -65,7 +65,7 @@ public class JWTUtils {
             throw new JwtException("JWT已过期", e);
         } catch (MalformedJwtException e) {
             throw new JwtException("JWT格式错误", e);
-        } catch (SignatureException e) {
+        } catch (@SuppressWarnings("deprecation") SignatureException e) {
             throw new JwtException("JWT签名验证失败", e);
         } catch (Exception e) {
             throw new JwtException("JWT验证失败", e);

@@ -6,7 +6,7 @@
     <resultMap id="PostResultMap" type="com.example.demo.pojo.Post">
         <id column="post_id" property="postId"/>
         <result column="user_id" property="userId"/>
-        <result column="book_id" property="bookID"/>
+        <result column="book_id" property="bookId"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="post_img" property="postImg"/>
@@ -19,7 +19,7 @@
         INSERT INTO post (
             user_id, book_id, title, content, post_img
         ) VALUES (
-                     #{userId}, #{bookID}, #{title}, #{content}, #{postImg}
+                     #{userId}, #{bookId}, #{title}, #{content}, #{postImg}
                  )
     </insert>
 
@@ -58,14 +58,14 @@
     <select id="searchPosts" resultMap="PostResultMap">
         SELECT * FROM post
         <where>
-            <if test="postId != 0">
+            <if test="postId != null">
                 AND post_id = #{postId}
             </if>
-            <if test="userId != 0">
+            <if test="userId != null">
                 AND user_id = #{userId}
             </if>
-            <if test="bookID != 0">
-                AND book_id = #{bookID}
+            <if test="bookId != null">
+                AND book_id = #{bookId}
             </if>
             <if test="title != null and !title.isEmpty()">
                 AND title LIKE CONCAT('%', #{title}, '%')

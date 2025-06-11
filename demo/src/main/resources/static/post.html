@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>书评测试页面</title>
+    <title>📘 书评测试页面 - 富文本版</title>
+
+    <!-- Quill CSS -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -63,10 +67,20 @@
             white-space: pre-wrap;
             word-wrap: break-word;
             font-family: monospace;
+            margin-top: 20px;
+        }
+
+        .post-content {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 10px;
+            background-color: white;
+            border-radius: 6px;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
         }
     </style>
@@ -75,16 +89,19 @@
 
 <div class="container">
 
-    <h2>📘 发布书评</h2>
+    <h2>📘 发布书评（支持富文本）</h2>
     <div class="section">
+        <label for="userIdForPublish">用户ID:</label>
+        <input type="text" id="userIdForPublish" value="1"/>
+
         <label for="bookIdForPublish">书籍ID:</label>
         <input type="text" id="bookIdForPublish"/>
 
+        <label>内容:</label>
+        <div id="editor" style="height: 300px;"></div>
+
         <label for="postTitle">标题:</label>
         <input type="text" id="postTitle"/>
-
-        <label for="postContent">内容:</label>
-        <input type="text" id="postContent"/>
 
         <label for="postImg">封面URL:</label>
         <input type="text" id="postImg"/>
@@ -114,8 +131,8 @@
         <label for="updatedTitle">新标题:</label>
         <input type="text" id="updatedTitle"/>
 
-        <label for="updatedContent">新内容:</label>
-        <input type="text" id="updatedContent"/>
+        <label>新内容:</label>
+        <div id="editorUpdate" style="height: 300px;"></div>
 
         <label for="updatedPostImg">新封面URL:</label>
         <input type="text" id="updatedPostImg"/>
@@ -135,61 +152,203 @@
 
 </div>
 
+<!-- Quill JS -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
 <script>
+    function formatOutput(data) {
+        return JSON.stringify(data, null, 2);
+    }
+
+    async function fetchWithCheck(url, options = {}) {
+        const output = document.getElementById('output');
+        output.innerText = "加载中...";
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log("【调试】API响应：", result); // 调试信息
+            return result;
+        } catch (error) {
+            output.innerText = `错误：${error.message}`;
+            alert("操作失败：" + error.message);
+            return null;
+        }
+    }
+
+    // 初始化主编辑器
+    const quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'link'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['align', { color: [] }, { background: [] }],
+                ['clean']
+            ]
+        }
+    });
+
+    // 初始化更新编辑器
+    const quillUpdate = new Quill('#editorUpdate', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'link'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['align', { color: [] }, { background: [] }],
+                ['clean']
+            ]
+        }
+    });
+
     async function publishPost() {
-        const response = await fetch('/api/post', {
+        const userId = parseInt(document.getElementById('userIdForPublish').value);
+        const bookId = parseInt(document.getElementById('bookIdForPublish').value);
+        const title = document.getElementById('postTitle').value.trim();
+        const content = quill.root.innerHTML; // 获取富文本内容（HTML）
+        const PostImg = document.getElementById('postImg').value.trim();
+
+        if (!userId || !bookId || !title || !content.trim()) {
+            alert("请填写完整的必要信息");
+            return;
+        }
+
+        await fetchWithCheck('/post/newPost', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                userId: 1,
-                bookID: document.getElementById('bookIdForPublish').value,
-                title: document.getElementById('postTitle').value,
-                content: document.getElementById('postContent').value,
-                PostImg: document.getElementById('postImg').value
+                userId,
+                bookId,
+                title,
+                content,
+                PostImg
             })
         });
-        const result = await response.json();
-        alert(JSON.stringify(result));
     }
 
     async function getBookPosts() {
-        const bookId = document.getElementById('bookIdForGet').value;
-        const response = await fetch(`/api/book/${bookId}/posts`);
-        const result = await response.json();
-        document.getElementById('output').innerText = JSON.stringify(result);
+        const bookId = parseInt(document.getElementById('bookIdForGet').value);
+        if (!bookId) {
+            alert("请输入有效的书籍ID");
+            return;
+        }
+
+        const result = await fetchWithCheck(`/post/getPostsOfBook/${bookId}`);
+        const output = document.getElementById('output');
+        output.innerHTML = ''; // 清空旧内容
+
+        if (result && Array.isArray(result)) {
+            if (result.length > 0) {
+                result.forEach(post => {
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'post-content';
+                    postDiv.innerHTML = `
+                        <h4>📌 标题: ${post.title}</h4>
+                        <hr>
+                        ${post.content}
+                    `;
+                    output.appendChild(postDiv);
+                });
+            } else {
+                output.innerText = '暂无相关书评。';
+            }
+        } else if (result && Array.isArray(result.data)) {
+            result.data.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post-content';
+                postDiv.innerHTML = `
+                    <h4>📌 标题: ${post.title}</h4>
+                    <hr>
+                    ${post.content}
+                `;
+                output.appendChild(postDiv);
+            });
+        } else {
+            output.innerText = '未找到该书籍的任何书评。';
+        }
     }
 
     async function deletePost() {
-        const postId = document.getElementById('postIdForDelete').value;
-        const response = await fetch(`/api/post/${postId}`, {method: 'DELETE'});
-        const result = await response.json();
-        alert(JSON.stringify(result));
+        const postId = parseInt(document.getElementById('postIdForDelete').value);
+        if (!postId) {
+            alert("请输入有效的帖子ID");
+            return;
+        }
+        await fetchWithCheck(`/post/delete/${postId}`, { method: 'DELETE' });
     }
 
     async function updatePost() {
-        const response = await fetch('/api/post', {
+        const postId = parseInt(document.getElementById('postIdForUpdate').value);
+        const title = document.getElementById('updatedTitle').value.trim();
+        const content = quillUpdate.root.innerHTML; // 获取更新的内容
+        const PostImg = document.getElementById('updatedPostImg').value.trim();
+
+        if (!postId) {
+            alert("请输入有效的帖子ID");
+            return;
+        }
+
+        await fetchWithCheck('/post/setPost', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                postId: document.getElementById('postIdForUpdate').value,
-                title: document.getElementById('updatedTitle').value,
-                content: document.getElementById('updatedContent').value,
-                PostImg: document.getElementById('updatedPostImg').value
+                postId,
+                title,
+                content,
+                PostImg
             })
         });
-        const result = await response.json();
-        alert(JSON.stringify(result));
     }
 
     async function getPostDetail() {
-        const postId = document.getElementById('postIdForGetDetail').value;
-        const response = await fetch(`/api/post/${postId}`);
-        const result = await response.json();
-        document.getElementById('output').innerText = JSON.stringify(result);
+        const postId = parseInt(document.getElementById('postIdForGetDetail').value);
+        if (!postId) {
+            alert("请输入有效的帖子ID");
+            return;
+        }
+
+        const result = await fetchWithCheck(`/post/getPost/${postId}`);
+        const output = document.getElementById('output');
+        output.innerHTML = ''; // 清空旧内容
+
+        if (result && result.data && result.data.content) {
+            const post = result.data;
+            
+            // 获取实际内容
+            let content = post.content;
+            if (post.content.startsWith('/post/content?file=')) {
+                try {
+                    const response = await fetch(post.content);
+                    if (response.ok) {
+                        content = await response.text();
+                    }
+                } catch (e) {
+                    console.error('获取内容失败:', e);
+                }
+            }
+
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'post-content';
+            detailDiv.innerHTML = `
+                <h4>📌 标题: ${post.title}</h4>
+                <hr>
+                <pre>${content}</pre>
+            `;
+            output.appendChild(detailDiv);
+        } else {
+            output.innerText = '未找到该帖子的详细内容。';
+        }
     }
 </script>
 

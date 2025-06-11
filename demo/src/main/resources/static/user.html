@@ -8,7 +8,7 @@
       const username = document.getElementById("login-username").value;
       const password = document.getElementById("login-password").value;
 
-      const res = await fetch("/login", {
+      const res = await fetch("/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${username}&password=${password}`
@@ -28,7 +28,7 @@
         signature: document.getElementById("register-signature").value
       };
 
-      const res = await fetch("/register", {
+      const res = await fetch("/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user)
@@ -41,7 +41,7 @@
     async function getUserInfo() {
       const username = document.getElementById("userinfo-username").value;
 
-      const res = await fetch("/getUserInfo", {
+      const res = await fetch("/user/getUserInfo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username })
@@ -62,7 +62,7 @@
         signature: document.getElementById("update-signature").value
       };
 
-      const res = await fetch("/updateUserInfo", {
+      const res = await fetch("/user/updateUserInfo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user)
@@ -75,7 +75,7 @@
     async function deleteUser() {
       const username = document.getElementById("delete-username").value;
 
-      const res = await fetch("/deleteUser", {
+      const res = await fetch("/user/deleteUser", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${username}`

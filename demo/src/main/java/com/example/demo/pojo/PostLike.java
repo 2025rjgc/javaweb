@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 // 帖子点赞
 public class PostLike {
-    private int likeId;
-    private int userId;
-    private int postId;
+    private Integer likeId;
+    private Integer userId;
+    private Integer postId;
     private LocalDateTime createTime;
 }

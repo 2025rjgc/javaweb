@@ -7,14 +7,19 @@ import java.util.List;
 
 @Mapper
 public interface PostMapper {
+    // 插入帖子
     void insertPost(Post post);
 
+    // 查询帖子
     List<Post> selectPostsByBookId(Integer bookId);
 
+    // 删除帖子
     int deletePostById(Integer postId);
 
+    // 更新帖子
     int updatePost(Post post);
 
+    // 查询帖子
     Post selectPostById(Integer postId);
 
     // 分页查询
