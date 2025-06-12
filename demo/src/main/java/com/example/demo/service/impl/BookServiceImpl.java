@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.mapper.BookMapper;
-import com.example.demo.pojo.Book;
+import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,7 +3,7 @@
 <mapper namespace="com.example.demo.mapper.BookMapper">
 
     <!-- 映射结果集 -->
-    <resultMap id="Book" type="com.example.demo.pojo.Book">
+    <resultMap id="Book" type="com.example.demo.entity.Book">
         <id column="book_id" property="bookId"/>
         <result column="book_name" property="bookName"/>
         <result column="book_pre" property="bookPre"/>
@@ -27,7 +27,7 @@
     </delete>
 
     <!-- 添加 -->
-    <insert id="addBook" parameterType="com.example.demo.pojo.Book" useGeneratedKeys="true" keyProperty="bookId">
+    <insert id="addBook" parameterType="com.example.demo.entity.Book" useGeneratedKeys="true" keyProperty="bookId">
         INSERT INTO book (
             book_name, book_pre, author, publisher, genre, book_img, book_url
         ) VALUES (
@@ -36,7 +36,7 @@
     </insert>
 
     <!-- 更新 -->
-    <update id="update" parameterType="com.example.demo.pojo.Book">
+    <update id="update" parameterType="com.example.demo.entity.Book">
         UPDATE book
         <set>
             <if test="bookName != null">book_name = #{bookName},</if>

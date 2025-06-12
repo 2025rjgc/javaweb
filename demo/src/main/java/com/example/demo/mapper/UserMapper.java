@@ -1,6 +1,6 @@
 package com.example.demo.mapper;
 
-import com.example.demo.pojo.User;
+import com.example.demo.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +28,6 @@ public interface UserMapper {
 
     // 删除用户
     int deleteUser(@Param("username") String username);
+
+    User findById(Integer userId);
 }

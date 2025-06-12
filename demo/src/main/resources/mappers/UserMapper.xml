@@ -3,12 +3,13 @@
 <mapper namespace="com.example.demo.mapper.UserMapper">
 
     <!-- 完整映射 User 类的所有字段 -->
-    <resultMap id="UserResultMap" type="com.example.demo.pojo.User">
+    <resultMap id="UserResultMap" type="com.example.demo.entity.User">
         <id column="user_id" property="userId"/>
         <result column="role" property="role"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
         <result column="person_id" property="personId"/>
+        <result column="circle_id" property="circleId"/>
         <result column="major" property="major"/>
         <result column="avatar" property="avatar"/>
         <result column="email" property="email"/>
@@ -27,23 +28,44 @@
     <select id="find" resultMap="UserResultMap">
         SELECT * FROM user
         <where>
-            <if test="username != null">
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="username != null and username != ''">
                 AND username = #{username}
             </if>
-            <if test="password != null">
+            <if test="password != null and password != ''">
                 AND password = #{password}
             </if>
-            <if test="personId != null">
+            <if test="personId != null and personId != ''">
                 AND person_id = #{personId}
             </if>
-            <if test="major != null">
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+            <if test="circleId != null">
+                AND circle_id = #{circleId}
+            </if>
+            <if test="major != null and major != ''">
                 AND major = #{major}
             </if>
-            <if test="email != null">
+            <if test="avatar != null and avatar != ''">
+                AND avatar = #{avatar}
+            </if>
+            <if test="email != null and email != ''">
                 AND email = #{email}
             </if>
-            <if test="phone != null">
-                AND phone= #{phone}
+            <if test="phone != null and phone != ''">
+                AND phone = #{phone}
+            </if>
+            <if test="signature != null and signature != ''">
+                AND signature = #{signature}
+            </if>
+            <if test="createTime != null">
+                AND create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                AND update_time = #{updateTime}
             </if>
         </where>
     </select>
@@ -62,6 +84,11 @@
         SELECT * FROM user
     </select>
 
+    <!-- 根据id查询用户-->
+    <select id="findById" resultMap="UserResultMap">
+        SELECT * FROM user WHERE user_id = #{userId}
+    </select>
+
     <!-- 分页查询用户 -->
     <select id="findAllByPage" resultMap="UserResultMap">
         SELECT * FROM user LIMIT #{start}, #{pageSize}
@@ -70,18 +97,21 @@
     <!-- 更新用户信息（可选字段） -->
     <update id="updateUserInfo">
         UPDATE user
-        SET
-        <if test="user.username != null">username = #{user.username},</if>
-        <if test="user.role != null">role = #{user.role},</if>
-        <if test="user.password != null">password = #{user.password},</if>
-        <if test="user.email != null">email = #{user.email},</if>
-        <if test="user.phone != null">phone = #{user.phone},</if>
-        <if test="user.personId != null">person_id = #{user.personId},</if>
-        <if test="user.major != null">major = #{user.major},</if>
-        <if test="user.avatar != null">avatar = #{user.avatar},</if>
-        <if test="user.signature != null">signature = #{user.signature},</if>
-        update_time = NOW()
-        WHERE user_id = #{user.userId}
+        <set>
+            <if test="username != null">username = #{user.username}</if>
+            <if test="role != null">, role = #{user.role}</if>
+            <if test="password != null">, password = #{user.password}</if>
+            <if test="personId != null">, person_id = #{user.personId}</if>
+            <if test="circleId != null">, circle_id = #{user.circleId}</if>
+            <if test="major != null">, major = #{user.major}</if>
+            <if test="avatar != null">, avatar = #{user.avatar}</if>
+            <if test="email != null">, email = #{user.email}</if>
+            <if test="phone != null">, phone = #{user.phone}</if>
+            <if test="signature != null">, signature = #{user.signature}</if>
+            <!-- 总是更新 updateTime -->
+            , update_time = NOW()
+        </set>
+        WHERE user_id = #{userId}
     </update>
 
     <!-- 删除用户 -->

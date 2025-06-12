@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MessageMapper">
+    <resultMap id="MessageResultMap" type="com.example.demo.entity.Message">
+        <id column="message_id" property="messageId"/>
+        <result column="user_id" property="userId"/>
+        <result column="book_id" property="bookId"/>
+        <result column="text" property="text"/>
+    </resultMap>
+
+    <!-- 查询某用户的消息 -->
+    <select id="getMessagesByUserId" resultType="com.example.demo.entity.Message">
+        SELECT *
+        FROM message
+        WHERE user_id = #{ownerId}
+    </select>
+
+    <!-- 插入新消息 -->
+    <insert id="newMessage">
+        INSERT INTO message (
+            user_id,
+            book_id,
+            text
+        ) VALUES (
+                     #{userId},
+                     #{bookId},
+                     #{text}
+                 )
+    </insert>
+
+</mapper>

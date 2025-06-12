@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.pojo.User;
+import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
 
             // 构建完整文件路径
             Path filePath = uploadPath.resolve(filename);
-
+            logger.info("保存文件路径: {}", filePath);
             // 保存文件
             Files.write(filePath, file.getBytes());
 
@@ -220,6 +220,7 @@ public class UserServiceImpl implements UserService {
     public byte[] getUserImage(String fileName) throws IOException {
         logger.info("获取用户头像: {}", fileName);
         Path imagePath = Paths.get(uploadDir, fileName);
+        logger.info("图片路径: {}", imagePath);
         if (!Files.exists(imagePath)) {
             logger.warn("文件不存在: {}", fileName);
             throw new IOException("文件不存在: " + fileName);
@@ -237,5 +238,10 @@ public class UserServiceImpl implements UserService {
     public List<User> getUserInfo(User user) {
         logger.info("根据条件查询用户信息");
         return userMapper.find(user);
+    }
+
+    @Override
+    public User findById(Integer userId) {
+        return userMapper.findById(userId);
     }
 }

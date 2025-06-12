@@ -1,11 +1,12 @@
 package com.example.demo.controller;
 
-import com.example.demo.pojo.Book;
-import com.example.demo.pojo.Result;
+import com.example.demo.entity.Book;
+import com.example.demo.entity.Result;
 import com.example.demo.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -25,6 +29,9 @@ public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private final BookService bookService;
+
+    @Value("${app.bookImg-upload-dir}")
+    private String BOOK_IMAGE_PATH;
 
     @Autowired
     public BookController(BookService bookService) {
@@ -131,18 +138,23 @@ public class BookController {
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
         try {
-            ClassPathResource resource = new ClassPathResource("images/book/" + fileName);
-            if (!resource.exists()) {
-                logger.warn("图片文件不存在: {}", fileName);
+            Path imagePath = Paths.get(BOOK_IMAGE_PATH, fileName);
+            logger.info("获取图书封面图片: {}", fileName);
+            logger.info("图片路径: {}", imagePath);
+
+            if (!Files.exists(imagePath)) {
+                logger.warn("图片文件不存在: {}", imagePath);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .contentType(MediaType.TEXT_PLAIN)
                         .body("文件不存在".getBytes(StandardCharsets.UTF_8));
             }
 
-            byte[] imageBytes = resource.getInputStream().readAllBytes();
+            byte[] imageBytes = Files.readAllBytes(imagePath);
+
+            MediaType mediaType = getMediaTypeForImageFileName(fileName);
 
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(mediaType)
                     .body(imageBytes);
 
         } catch (Exception e) {
@@ -151,6 +163,25 @@ public class BookController {
                     .contentType(MediaType.TEXT_PLAIN)
                     .body(("读取文件出错: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
         }
+    }
+
+    /**
+     * 根据文件名判断图片的MIME类型。
+     *
+     * @param fileName 文件名
+     * @return 对应的MediaType
+     */
+    private MediaType getMediaTypeForImageFileName(String fileName) {
+        String lowerCaseFileName = fileName.toLowerCase();
+        if (lowerCaseFileName.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        } else if (lowerCaseFileName.endsWith(".gif")) {
+            return MediaType.IMAGE_GIF;
+        } else if (lowerCaseFileName.endsWith(".jpg") || lowerCaseFileName.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        }
+        // 默认返回 JPEG 类型
+        return MediaType.IMAGE_JPEG;
     }
 
     /**
@@ -164,7 +195,7 @@ public class BookController {
         try {
             ClassPathResource resource = new ClassPathResource("txt/" + fileName);
             if (!resource.exists()) {
-                logger.warn("文本文件不存在: {}", fileName);
+                logger.warn("文本文件不存在: {}", resource);
                 return Result.error("文件不存在");
             }
 

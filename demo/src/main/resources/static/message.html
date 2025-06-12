@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>消息测试</title>
+</head>
+<body>
+<h2>新增一条消息</h2>
+<form id="newMessageForm">
+  用户ID：<input type="text" id="userId" name="userId"><br><br>
+  图书ID：<input type="text" id="bookId" name="bookId"><br><br>
+  内容：<input type="text" id="text" name="text"><br><br>
+  <button type="submit">发送消息</button>
+</form>
+
+<h2>获取用户的消息</h2>
+<form id="getMessageForm">
+  用户ID：<input type="number" id="getUserId" name="userId"><br><br>
+  <button type="submit">获取消息</button>
+</form>
+
+<h3>返回结果：</h3>
+<pre id="result"></pre>
+
+<script>
+  // 处理新增消息表单提交
+  document.getElementById('newMessageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const message = {
+      userId: document.getElementById('userId').value,
+      bookId: document.getElementById('bookId').value,
+      text: document.getElementById('text').value
+    };
+
+    fetch('http://localhost:8080/message/newMessage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(message)
+    })
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+              document.getElementById('result').textContent = '错误: ' + error;
+            });
+  });
+
+  // 处理获取消息表单提交
+  document.getElementById('getMessageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const userId = document.getElementById('getUserId').value;
+
+    fetch(`http://localhost:8080/message/getMessage?userId=${userId}`, {
+      method: 'POST'
+    })
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+              document.getElementById('result').textContent = '错误: ' + error;
+            });
+  });
+</script>
+</body>
+</html>

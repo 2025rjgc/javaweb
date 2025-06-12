@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
 
-import com.example.demo.pojo.User;
+import com.example.demo.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -24,4 +24,6 @@ public interface UserService {
     byte[] getUserImage(String fileName) throws IOException;
 
     List<User> getUserInfo(User user);
+
+    User findById(Integer userId);
 }

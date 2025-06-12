@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.pojo.Result;
-import com.example.demo.pojo.User;
+import com.example.demo.entity.Result;
+import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +80,7 @@ public class UserController {
         logger.info("根据条件查询用户信息: {}", user);
         List<User> userList = userService.getUserInfo(user);
         if (userList != null && !userList.isEmpty()) {
+            logger.info("查询成功: {}", userList);
             return Result.success(userList);
         } else {
             logger.warn("未找到符合条件的用户: {}", user);

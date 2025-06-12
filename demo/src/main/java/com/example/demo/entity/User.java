@@ -1,4 +1,4 @@
-package com.example.demo.pojo;
+package com.example.demo.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -15,6 +15,7 @@ public class User {
     private String username;    // 用户名
     private String password;    // 用户密码
     private String personId;  // 学工号
+    private Integer circleId;    // 圈子id
     private String major;   // 专业
     private String avatar; // 用户头像
     private String email;   // 用户邮箱
