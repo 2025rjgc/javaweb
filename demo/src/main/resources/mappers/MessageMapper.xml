@@ -8,6 +8,8 @@
         <result column="user_id" property="userId"/>
         <result column="book_id" property="bookId"/>
         <result column="text" property="text"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <!-- 查询某用户的消息 -->
@@ -22,12 +24,55 @@
         INSERT INTO message (
             user_id,
             book_id,
-            text
+            text,
+            create_time,
+            update_time
         ) VALUES (
-                     #{userId},
-                     #{bookId},
-                     #{text}
+            #{userId},
+            #{bookId},
+            #{text},
+            NOW(),
+            NOW()
                  )
     </insert>
+
+    <!-- 删除消息 -->
+    <delete id="deleteMessage">
+        DELETE FROM message WHERE message_id = #{messageId}
+    </delete>
+
+    <!-- 修改消息 -->
+    <update id="updateMessage">
+        UPDATE message
+        <set>
+            <if test="userId != null and userId != 0">
+                user_id = #{userId},
+            </if>
+            <if test="bookId != null and bookId != 0">
+                book_id = #{bookId},
+            </if>
+            <if test="text != null">
+                text = #{text},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE message_id = #{messageId}
+    </update>
+
+    <!-- 多条件查询消息 -->
+    <select id="searchMessages" resultMap="MessageResultMap">
+        SELECT *
+        FROM message
+        WHERE 1=1
+        <if test="userId != null and userId != ''">
+            AND user_id = #{userId}
+        </if>
+        <if test="bookId != null and bookId != ''">
+            AND book_id = #{bookId}
+        </if>
+        <if test="text != null and text != ''">
+            AND text LIKE CONCAT('%', #{text}, '%')
+        </if>
+    </select>
 
 </mapper>

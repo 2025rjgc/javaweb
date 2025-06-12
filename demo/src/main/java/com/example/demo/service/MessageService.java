@@ -7,4 +7,10 @@ public interface MessageService {
     List<Message> getMessagesByUserId(Integer userId);
 
     void newMessage(Message message);
+
+    void deleteMessage(Integer messageId);
+
+    void updateMessage(Message message);
+
+    List<Message> searchMessages(String userId, String bookId, String text);
 }

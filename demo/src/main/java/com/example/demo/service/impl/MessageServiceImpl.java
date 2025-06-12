@@ -73,4 +73,51 @@ public class MessageServiceImpl implements MessageService {
             throw new RuntimeException("新增消息失败", e);
         }
     }
+
+    /**
+     * 删除一条消息（带事务管理）
+     * @param messageId 消息ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteMessage(Integer messageId) {
+        try {
+            messageMapper.deleteMessage(messageId);
+        } catch (Exception e) {
+            logger.error("删除消息时发生异常: {}", e.getMessage(), e);
+            throw new RuntimeException("删除消息失败", e);
+        }
+    }
+
+    /**
+     * 更新一条消息（带事务管理）
+     * @param message 消息对象
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateMessage(Message message) {
+        try {
+            messageMapper.updateMessage(message);
+        } catch (Exception e) {
+            logger.error("更新消息时发生异常: {}", e.getMessage(), e);
+            throw new RuntimeException("更新消息失败", e);
+        }
+    }
+
+    /**
+     * 多条件查询消息
+     * @param userId 用户ID
+     * @param bookId 书籍ID
+     * @param text 查询文本
+     * @return 消息列表
+     */
+    @Override
+    public List<Message> searchMessages(String userId, String bookId, String text) {
+        try {
+            return messageMapper.searchMessages(userId, bookId, text);
+        } catch (Exception e) {
+            logger.error("多条件查询消息时发生异常: {}", e.getMessage(), e);
+            throw new RuntimeException("多条件查询消息失败", e);
+        }
+    }
 }

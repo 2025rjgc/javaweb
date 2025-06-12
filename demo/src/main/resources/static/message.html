@@ -7,8 +7,8 @@
 <body>
 <h2>新增一条消息</h2>
 <form id="newMessageForm">
-  用户ID：<input type="text" id="userId" name="userId"><br><br>
-  图书ID：<input type="text" id="bookId" name="bookId"><br><br>
+  用户ID：<input type="number" id="userId" name="userId"><br><br>
+  图书ID：<input type="number" id="bookId" name="bookId"><br><br>
   内容：<input type="text" id="text" name="text"><br><br>
   <button type="submit">发送消息</button>
 </form>
@@ -19,52 +19,105 @@
   <button type="submit">获取消息</button>
 </form>
 
+<h2>删除消息</h2>
+<form id="deleteMessageForm">
+  消息ID：<input type="number" id="deleteMessageId" name="messageId"><br><br>
+  <button type="submit">删除消息</button>
+</form>
+
+<h2>修改消息</h2>
+<form id="updateMessageForm">
+  消息ID：<input type="number" id="updateMessageId" name="messageId"><br><br>
+  用户ID：<input type="number" id="updateUserId" name="userId"><br><br>
+  图书ID：<input type="number" id="updateBookId" name="bookId"><br><br>
+  内容：<input type="text" id="updateText" name="text"><br><br>
+  <button type="submit">修改消息</button>
+</form>
+
+<h2>多条件查询消息</h2>
+<form id="searchMessagesForm">
+  用户ID：<input type="number" id="searchUserId" name="userId"><br><br>
+  图书ID：<input type="number" id="searchBookId" name="bookId"><br><br>
+  内容：<input type="text" id="searchText" name="text"><br><br>
+  <button type="submit">查询</button>
+</form>
+
 <h3>返回结果：</h3>
 <pre id="result"></pre>
 
 <script>
-  // 处理新增消息表单提交
+  // 新增消息
   document.getElementById('newMessageForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
     const message = {
-      userId: document.getElementById('userId').value,
-      bookId: document.getElementById('bookId').value,
+      userId: Number(document.getElementById('userId').value),
+      bookId: Number(document.getElementById('bookId').value),
       text: document.getElementById('text').value
     };
-
-    fetch('http://localhost:8080/message/newMessage', {
+    fetch('/message/newMessage', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message)
     })
-            .then(response => response.json())
-            .then(data => {
-              document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-              document.getElementById('result').textContent = '错误: ' + error;
-            });
+      .then(response => response.json())
+      .then(data => { document.getElementById('result').textContent = JSON.stringify(data, null, 2); })
+      .catch(error => { document.getElementById('result').textContent = '错误: ' + error; });
   });
 
-  // 处理获取消息表单提交
+  // 获取消息
   document.getElementById('getMessageForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
     const userId = document.getElementById('getUserId').value;
+    fetch(`/message/getMessage?userId=${userId}`, { method: 'POST' })
+      .then(response => response.json())
+      .then(data => { document.getElementById('result').textContent = JSON.stringify(data, null, 2); })
+      .catch(error => { document.getElementById('result').textContent = '错误: ' + error; });
+  });
 
-    fetch(`http://localhost:8080/message/getMessage?userId=${userId}`, {
-      method: 'POST'
+  // 删除消息
+  document.getElementById('deleteMessageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const messageId = document.getElementById('deleteMessageId').value;
+    fetch(`/message/delete?messageId=${messageId}`, { method: 'DELETE' })
+      .then(response => response.json())
+      .then(data => { document.getElementById('result').textContent = JSON.stringify(data, null, 2); })
+      .catch(error => { document.getElementById('result').textContent = '错误: ' + error; });
+  });
+
+  // 修改消息
+  document.getElementById('updateMessageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const message = {
+      messageId: Number(document.getElementById('updateMessageId').value),
+      userId: Number(document.getElementById('updateUserId').value),
+      bookId: Number(document.getElementById('updateBookId').value),
+      text: document.getElementById('updateText').value
+    };
+    fetch('/message/update', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message)
     })
-            .then(response => response.json())
-            .then(data => {
-              document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-              document.getElementById('result').textContent = '错误: ' + error;
-            });
+      .then(response => response.json())
+      .then(data => { document.getElementById('result').textContent = JSON.stringify(data, null, 2); })
+      .catch(error => { document.getElementById('result').textContent = '错误: ' + error; });
+  });
+
+  // 多条件查询
+  document.getElementById('searchMessagesForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userId = document.getElementById('searchUserId').value;
+    const bookId = document.getElementById('searchBookId').value;
+    const text = document.getElementById('searchText').value;
+    const params = [];
+    if (userId) params.push(`userId=${userId}`);
+    if (bookId) params.push(`bookId=${bookId}`);
+    if (text) params.push(`text=${encodeURIComponent(text)}`);
+    const query = params.length ? '?' + params.join('&') : '';
+    fetch(`/message/search${query}`, { method: 'GET' })
+      .then(response => response.json())
+      .then(data => { document.getElementById('result').textContent = JSON.stringify(data, null, 2); })
+      .catch(error => { document.getElementById('result').textContent = '错误: ' + error; });
   });
 </script>
 </body>

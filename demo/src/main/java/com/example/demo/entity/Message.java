@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Message {
     private Integer messageId;  // 消息id
-    private String userId;  // 用户id
-    private String bookId;  // 图书id
+    private Integer userId;  // 用户id
+    private Integer bookId;  // 图书id
     private String text;    // 消息内容
     private LocalDateTime createTime;   // 创建时间
     private LocalDateTime updateTime;   // 更新时间
