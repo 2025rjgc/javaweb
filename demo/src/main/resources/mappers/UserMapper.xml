@@ -89,6 +89,11 @@
         SELECT * FROM user WHERE user_id = #{userId}
     </select>
 
+    <!-- 根据用户名查询用户-->
+    <select id="findByName" resultMap="UserResultMap">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
     <!-- 分页查询用户 -->
     <select id="findAllByPage" resultMap="UserResultMap">
         SELECT * FROM user LIMIT #{start}, #{pageSize}

@@ -30,4 +30,6 @@ public interface UserMapper {
     int deleteUser(@Param("username") String username);
 
     User findById(Integer userId);
+
+    User findByName(String owner);
 }

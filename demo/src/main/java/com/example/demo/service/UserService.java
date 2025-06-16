@@ -26,4 +26,6 @@ public interface UserService {
     List<User> getUserInfo(User user);
 
     User findById(Integer userId);
+
+    User findByName(String owner);
 }

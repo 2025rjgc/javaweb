@@ -45,12 +45,14 @@ public class MessageServiceImpl implements MessageService {
                 logger.warn("用户 {} 没有加入圈子", userId);
                 return List.of(); // 没有圈子，返回空
             }
-            // 获取圈子信息-导师id
-            Integer ownerId = circleMapper.getInfo(circleId).getOwner();
-            if (ownerId == null) {
+            // 获取圈子信息-导师用户名
+            String owner = circleMapper.getInfo(circleId).getOwner();
+            if (owner == null) {
                 logger.warn("圈子 {} 不存在", circleId);
                 return List.of(); // 圈子不存在，返回空
             }
+            // 获取导师用户ID
+            Integer ownerId = userService.findByName(owner).getUserId();
             // 获取导师对应的消息
             return messageMapper.getMessagesByUserId(ownerId);
         } catch (Exception e) {

@@ -1,17 +1,32 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.circle;
+
+import com.example.demo.entity.Circle;
+import com.example.demo.entity.Members;
 
 import java.util.List;
 
+
+
 public interface CircleService {
-    List<circle> findAll();
+    //获取圈子列表
+    List<Circle> selectCircleList(Circle quanzi);
 
-    circle findById(Integer circleId);
+    //根据id获取圈子信息
+    Circle getInfo(Integer id);
 
-    boolean addCircle(circle circle);
+    //创建圈子
+    void createCircle(Circle quanzi);
 
-    boolean updateCircle(circle circle);
+    //删除圈子
+    void deleteCircle(Integer id);
 
-    boolean deleteCircle(Integer circleId);
+    // 获取成员列表
+    List<Members> getMembers(Integer id);
+
+    // 获取邀请列表
+    List<Members> getInvite(Integer id);
+
+    // 邀请成员
+    void inviteMember(Integer id,Members member);
 }
