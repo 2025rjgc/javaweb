@@ -29,7 +29,9 @@ public interface UserMapper {
     // 删除用户
     int deleteUser(@Param("username") String username);
 
-    User findById(Integer userId);
+    // 根据id查询用户
+    User findById(@Param("userId") Integer userId);
 
-    User findByName(String owner);
+    // 根据用户名查询用户
+    User findByName(@Param("username") String owner);
 }

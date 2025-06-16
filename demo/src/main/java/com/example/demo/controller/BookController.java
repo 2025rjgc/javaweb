@@ -7,12 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -138,7 +135,25 @@ public class BookController {
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
         try {
-            Path imagePath = Paths.get(BOOK_IMAGE_PATH, fileName);
+            // 安全检查：防止路径穿越
+            if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+                logger.warn("非法文件名: {}", fileName);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .body("无效的文件名".getBytes(StandardCharsets.UTF_8));
+            }
+
+            // 规范化文件名并构建路径
+            Path imagePath = Paths.get(BOOK_IMAGE_PATH).resolve(fileName).normalize();
+
+            // 确保路径在指定目录下，防止跳出指定目录
+            if (!imagePath.toRealPath().startsWith(Paths.get(BOOK_IMAGE_PATH).toRealPath())) {
+                logger.warn("尝试访问受限目录外的文件: {}", fileName);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .body("无权访问该文件".getBytes(StandardCharsets.UTF_8));
+            }
+
             logger.info("获取图书封面图片: {}", fileName);
             logger.info("图片路径: {}", imagePath);
 
@@ -150,7 +165,6 @@ public class BookController {
             }
 
             byte[] imageBytes = Files.readAllBytes(imagePath);
-
             MediaType mediaType = getMediaTypeForImageFileName(fileName);
 
             return ResponseEntity.ok()
@@ -164,6 +178,7 @@ public class BookController {
                     .body(("读取文件出错: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
         }
     }
+
 
     /**
      * 根据文件名判断图片的MIME类型。
@@ -182,36 +197,5 @@ public class BookController {
         }
         // 默认返回 JPEG 类型
         return MediaType.IMAGE_JPEG;
-    }
-
-    /**
-     * 获取图书介绍文本内容。
-     *
-     * @param fileName 文本文件名
-     * @return 返回文本内容字符串
-     */
-    @GetMapping("/txt/{fileName:.+}")
-    public Result getFile(@PathVariable String fileName) {
-        try {
-            ClassPathResource resource = new ClassPathResource("txt/" + fileName);
-            if (!resource.exists()) {
-                logger.warn("文本文件不存在: {}", resource);
-                return Result.error("文件不存在");
-            }
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-            StringBuilder contentBuilder = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                contentBuilder.append(line).append("\n");
-            }
-
-            return Result.success(contentBuilder.toString());
-
-        } catch (Exception e) {
-            logger.error("读取文本文件失败: {}", fileName, e);
-            return Result.error("读取文件失败：" + e.getMessage());
-        }
     }
 }

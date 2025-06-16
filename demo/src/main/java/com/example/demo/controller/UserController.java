@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Result;
 import com.example.demo.entity.User;
+import com.example.demo.filter.GetContentType;
 import com.example.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,46 +183,17 @@ public class UserController {
             logger.info("获取用户头像: {}", fileName);
             byte[] imageBytes = userService.getUserImage(fileName);
 
-            String contentType = getContentTypeByExtension(fileName);
+            String contentType = GetContentType.getContentTypeByExtension(fileName);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=\"" + fileName + "\"")
                     .body(imageBytes);
-
         } catch (IOException e) {
             logger.error("获取头像失败: {}", fileName, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.TEXT_PLAIN)
                     .body(e.getMessage().getBytes(StandardCharsets.UTF_8));
         }
-    }
-
-    /**
-     * 根据文件扩展名返回对应的 MIME 类型。
-     */
-    private String getContentTypeByExtension(String fileName) {
-        String extension = getFileExtension(fileName).toLowerCase();
-
-        switch (extension) {
-            case "png": return "image/png";
-            case "gif": return "image/gif";
-            case "webp": return "image/webp";
-            case "bmp": return "image/bmp";
-            case "svg": return "image/svg+xml";
-            case "jpg":
-            case "jpeg":
-            default: return "image/jpeg";
-        }
-    }
-
-    /**
-     * 获取文件扩展名。
-     */
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.isEmpty()) return "";
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex == -1 || dotIndex == fileName.length() - 1) return "";
-        return fileName.substring(dotIndex + 1);
     }
 }

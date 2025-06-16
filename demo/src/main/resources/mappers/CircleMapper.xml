@@ -11,7 +11,7 @@
     </update>
 
     <!--查询所有圈子-->
-    <select id="selectQuanziList" resultType="com.example.demo.entity.Circle">
+    <select id="selectCircleList" resultType="com.example.demo.entity.Circle">
         SELECT *
         FROM circles
         <where>

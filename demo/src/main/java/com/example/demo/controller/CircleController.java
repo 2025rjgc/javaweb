@@ -29,7 +29,7 @@ public class CircleController {
         Circle quanzi= circleService.getInfo(id);
         return Result.success(quanzi);
     }
-    //  创建圈子‘
+    //  创建圈子
 
     @PostMapping
     public Result createCircle(@RequestBody Circle quanzi)

@@ -10,13 +10,18 @@ import java.util.List;
 @Mapper
 public interface PostMapper {
 
+    // 获取某个圈子的帖子
     List<Post> selectPostsByCircleId(@Param("circleId") Integer circleId);
 
+    // 获取帖子详情
     Post selectPostById(@Param("circleId") Integer circleId, @Param("postId") Integer postId);
 
+    // 获取帖子详情
     List<Comments> selectCommentsByPostId(Integer postId);// 获取某条帖子的详细信息（含评论）
 
+    // 创建帖子
     void insertPost(Post post);
 
+    // 创建评论
     void insertComment(Comments comment);
 }

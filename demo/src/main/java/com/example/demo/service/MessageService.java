@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Message;
+import com.example.demo.view.MessageView;
+
 import java.util.List;
 
 public interface MessageService {
-    List<Message> getMessagesByUserId(Integer userId);
+    List<MessageView> getMessagesByUserId(Integer userId);
 
     void newMessage(Message message);
 

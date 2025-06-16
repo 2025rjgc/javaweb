@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.entity.Message;
 import com.example.demo.entity.Result;
 import com.example.demo.service.MessageService;
+import com.example.demo.view.MessageView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class messageController {
     public Result getMessage(@RequestParam Integer userId) {
         logger.info("获取用户 {} 收到的消息", userId);
         try {
-            List<Message> messages = messageService.getMessagesByUserId(userId);
+            List<MessageView> messages = messageService.getMessagesByUserId(userId);
             if (messages.isEmpty()){
                 return Result.error("没有找到消息");
             }

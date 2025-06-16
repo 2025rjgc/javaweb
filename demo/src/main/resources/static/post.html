@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>帖子测试页面</title>
+</head>
+<body>
+    <h1>帖子测试页面</h1>
+
+    <h2>获取圈子下所有帖子</h2>
+    <input type="number" id="circleId" placeholder="圈子ID">
+    <button onclick="getPosts()">获取帖子列表</button>
+    <pre id="posts"></pre>
+
+    <h2>获取指定帖子详情</h2>
+    <input type="number" id="circleId2" placeholder="圈子ID">
+    <input type="number" id="postId" placeholder="帖子ID">
+    <button onclick="getPostDetail()">获取帖子详情</button>
+    <pre id="postDetail"></pre>
+
+    <h2>发帖</h2>
+    <input type="number" id="circleId3" placeholder="圈子ID">
+    <input type="text" id="username" placeholder="用户名">
+    <input type="text" id="avatar" placeholder="头像URL">
+    <textarea id="content" placeholder="帖子内容"></textarea>
+    <button onclick="createPost()">发帖</button>
+    <pre id="createPostResult"></pre>
+
+    <h2>评论帖子</h2>
+    <input type="number" id="circleId4" placeholder="圈子ID">
+    <input type="number" id="postId2" placeholder="帖子ID">
+    <input type="text" id="commentUsername" placeholder="评论用户名">
+    <textarea id="commentContent" placeholder="评论内容"></textarea>
+    <button onclick="createComment()">发表评论</button>
+    <pre id="createCommentResult"></pre>
+
+    <script>
+        function getPosts() {
+            const circleId = document.getElementById('circleId').value;
+            fetch(`/api/circles/${circleId}/posts`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('posts').textContent = JSON.stringify(data, null, 2);
+                });
+        }
+
+        function getPostDetail() {
+            const circleId = document.getElementById('circleId2').value;
+            const postId = document.getElementById('postId').value;
+            fetch(`/api/circles/${circleId}/post/${postId}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('postDetail').textContent = JSON.stringify(data, null, 2);
+                });
+        }
+
+        function createPost() {
+            const circleId = document.getElementById('circleId3').value;
+            const username = document.getElementById('username').value;
+            const avatar = document.getElementById('avatar').value;
+            const content = document.getElementById('content').value;
+            fetch(`/api/circles/${circleId}/posts`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, avatar, content})
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('createPostResult').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        function createComment() {
+            const circleId = document.getElementById('circleId4').value;
+            const postId = document.getElementById('postId2').value;
+            const username = document.getElementById('commentUsername').value;
+            const content = document.getElementById('commentContent').value;
+            fetch(`/api/circles/${circleId}/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, content})
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('createCommentResult').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+    </script>
+</body>
+</html>

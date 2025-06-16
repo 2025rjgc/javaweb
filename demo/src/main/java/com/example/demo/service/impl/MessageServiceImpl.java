@@ -1,17 +1,24 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.entity.Book;
 import com.example.demo.entity.Message;
+import com.example.demo.entity.User;
 import com.example.demo.mapper.CircleMapper;
 import com.example.demo.mapper.MessageMapper;
+import com.example.demo.service.BookService;
 import com.example.demo.service.MessageService;
 import com.example.demo.service.UserService;
+import com.example.demo.view.MessageView;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 新增事务管理
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 消息服务实现类
@@ -23,12 +30,14 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final CircleMapper circleMapper;
     private final MessageMapper messageMapper;
+    private final BookService bookService;
 
     @Autowired
-    public MessageServiceImpl(UserService userService, CircleMapper circleMapper, MessageMapper messageMapper) {
+    public MessageServiceImpl(UserService userService, CircleMapper circleMapper, MessageMapper messageMapper, BookService bookService) {
         this.userService = userService;
         this.circleMapper = circleMapper;
         this.messageMapper = messageMapper;
+        this.bookService = bookService;
     }
 
     /**
@@ -37,7 +46,7 @@ public class MessageServiceImpl implements MessageService {
      * @return 消息列表
      */
     @Override
-    public List<Message> getMessagesByUserId(Integer userId) {
+    public List<MessageView> getMessagesByUserId(Integer userId) {
         try {
             // 获取用户信息-圈子id
             Integer circleId = userService.findById(userId).getCircleId();
@@ -54,7 +63,21 @@ public class MessageServiceImpl implements MessageService {
             // 获取导师用户ID
             Integer ownerId = userService.findByName(owner).getUserId();
             // 获取导师对应的消息
-            return messageMapper.getMessagesByUserId(ownerId);
+            List<Message> messages = messageMapper.getMessagesByUserId(ownerId);
+            ArrayList<MessageView> messageViews = new ArrayList<>();
+            for (Message message : messages){
+                MessageView messageView = new MessageView(
+                        message.getMessageId(),
+                        message.getUserId(),
+                        message.getBookId(),
+                        userService.findById(message.getUserId()).getUsername(),
+                        bookService.findById(message.getBookId()).getBookName(),
+                        message.getText(),
+                        message.getCreateTime(),
+                        message.getUpdateTime());
+                messageViews.add(messageView);
+            }
+            return messageViews;
         } catch (Exception e) {
             logger.error("获取用户 {} 消息时发生异常: {}", userId, e.getMessage(), e);
             throw new RuntimeException("获取消息失败", e);

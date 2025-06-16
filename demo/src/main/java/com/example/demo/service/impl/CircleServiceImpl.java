@@ -21,7 +21,7 @@ public class CircleServiceImpl implements CircleService {
     //  查询所有圈子
     @Override
     public List<Circle> selectCircleList(Circle circle) {
-        return circleMapper.selectQuanziList(circle);
+        return circleMapper.selectCircleList(circle);
     }
 
     //  根据id查询圈子信息

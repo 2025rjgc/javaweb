@@ -30,6 +30,8 @@ public class UserServiceImpl implements UserService {
     // 注入上传目录路径（application.yml 配置）
     @Value("${app.userImg-upload-dir}")
     private String uploadDir;
+    @Value("${app.userImg-access-dir}")
+    private String accessDir;
 
     // 构造器注入 UserMapper
     private final UserMapper userMapper;
@@ -91,7 +93,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setRole(0);
-        user.setAvatar("/user/image/default.png"); // 设置默认头像
+        user.setAvatar(accessDir + "/" + "default.png"); // 设置默认头像
         userMapper.insert(user);
 
         HashMap<String, Object> map = new HashMap<>();
@@ -183,7 +185,7 @@ public class UserServiceImpl implements UserService {
             // 更新数据库中的头像路径
             User user = new User();
             user.setUserId(Integer.parseInt(userId));
-            user.setAvatar("/user/image/" + filename);
+            user.setAvatar(accessDir + "/" + filename);
             userMapper.updateUserInfo(user);
 
             logger.info("头像上传成功: {}", filename);

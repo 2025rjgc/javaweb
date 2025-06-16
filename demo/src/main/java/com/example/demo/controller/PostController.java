@@ -54,5 +54,4 @@ public class PostController {
         log.info("createdComment: {}", createdComment);
         return Result.success();
     }
-
 }

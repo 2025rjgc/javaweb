@@ -163,4 +163,9 @@ public class BookServiceImpl implements BookService {
             throw e;
         }
     }
+
+    @Override
+    public Book findById(Integer bookId) {
+        return bookMapper.findById(bookId);
+    }
 }
