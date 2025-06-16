@@ -19,7 +19,7 @@ public class uploadFile    {
     // 指定本地保存路径
     @Value("${app.other-upload-dir}")
     private String uploadDir;
-
+    // 后端服务器ip
     @Value("${app.ip}")
     private String ip;
         @PostMapping("/upload")
