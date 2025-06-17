@@ -24,4 +24,12 @@
             <!-- 可以继续添加其他字段 -->
         </where>
     </select>
+    <!--    删除圈子-->
+    <delete id="deleteCircle">
+        DELETE circles, circle_posts, circle_post_comments
+    FROM circles
+    LEFT JOIN circle_posts ON circles.id = circle_posts.circle_id
+    LEFT JOIN circle_post_comments ON circle_posts.id = circle_post_comments.post_id
+    WHERE circles.id = #{circleId};
+    </delete>
 </mapper>

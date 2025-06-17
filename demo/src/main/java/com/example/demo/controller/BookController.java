@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,7 +27,7 @@ public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private final BookService bookService;
-
+    // 图书封面图片上传路径
     @Value("${app.bookImg-upload-dir}")
     private String BOOK_IMAGE_PATH;
 
@@ -103,6 +104,18 @@ public class BookController {
             return Result.error("添加失败：" + e.getMessage());
         }
     }
+    /**
+     * 获取图书详情。
+     *
+     * @param bookId 要获取的图书ID
+     * @return 返回图书详情
+    * */
+    @GetMapping("/getBookDetail")
+    public Result getBookDetail(@RequestParam("bookId") Integer bookId) {
+        logger.info("获取图书详情: {}", bookId);
+        Book book = bookService.findById(bookId);
+        return book != null ? Result.success(book) : Result.error("图书不存在");
+    }
 
     /**
      * 修改已有图书信息。
@@ -125,6 +138,54 @@ public class BookController {
             return Result.error("更新失败：" + e.getMessage());
         }
     }
+
+    /**
+    * 上传图书封面图片
+    *
+    * @param file 要上传的图片文件
+    * @return 返回上传结果
+    * */
+    @PostMapping("/setImage")
+    public Result setImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("filename") String filename) {
+        logger.info("设置图书封面: {}", filename);
+
+        if (file.isEmpty()) {
+            logger.warn("上传文件为空");
+            return Result.error("文件为空");
+        }
+
+        if (filename == null || filename.trim().isEmpty()) {
+            logger.warn("文件名为空");
+            return Result.error("文件名为空");
+        }
+
+        // 文件类型检查
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !(originalFilename.toLowerCase().endsWith(".png")
+                || originalFilename.toLowerCase().endsWith(".jpg")
+                || originalFilename.toLowerCase().endsWith(".jpeg"))) {
+            logger.warn("不允许的文件类型: {}", filename);
+            return Result.error("不允许的文件类型");
+        }
+
+        // 文件大小限制（5MB）
+        if (file.getSize() > 5 * 1024 * 1024) {
+            logger.warn("文件过大: {}", filename);
+            return Result.error("文件大小不能超过5MB");
+        }
+
+        String ImageUrl = bookService.updateImage(file, filename);
+
+        if (ImageUrl == null) {
+            logger.error("上传图片失败: {}", filename);
+            return Result.error("上传失败");
+        }
+        logger.info("上传成功: {}", ImageUrl);
+        return Result.success(ImageUrl);
+    }
+
 
     /**
      * 获取图书封面图片。

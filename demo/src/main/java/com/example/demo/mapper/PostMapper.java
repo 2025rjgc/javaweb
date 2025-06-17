@@ -24,4 +24,16 @@ public interface PostMapper {
 
     // 创建评论
     void insertComment(Comments comment);
+
+    // 删除某个帖子的所有评论
+    @Delete("delete from circle_post_comments where post_id=#{postId}")
+    void deleteCommentByPostId(Integer postId);
+
+    // 删除某个圈子的所有帖子以及评论
+    @Delete("delete from circle_posts where circle_id=#{id} and id=#{postId}")
+    void deletePostsByCircleId(@Param("id") Integer id,@Param("postId") Integer postId);
+
+    //删除评论
+    @Delete("delete from circle_post_comments where post_id=#{postId} and id=#{commentId}")
+    void deleteComment(@Param("postId") Integer postId,@Param("commentId") Integer commentId);
 }

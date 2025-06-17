@@ -6,12 +6,20 @@ import com.example.demo.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+
+import static com.example.demo.filter.FileTools.isImageFile;
 
 /**
  * 图书服务实现类，提供图书的增删改查业务逻辑。
@@ -22,6 +30,11 @@ public class BookServiceImpl implements BookService {
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
     private final BookMapper bookMapper;
+    // 注入上传目录路径（application.yml 配置）
+    @Value("${app.bookImg-upload-dir}")
+    private String uploadDir;
+    @Value("${app.bookImg-access-dir}")
+    private String accessDir;
 
     @Autowired
     public BookServiceImpl(BookMapper bookMapper) {
@@ -105,14 +118,13 @@ public class BookServiceImpl implements BookService {
      * 新增一本图书。
      *
      * @param book 要新增的图书对象
-     * @return 新增成功返回 true，失败返回 false
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addBook(Book book) {
+    public void addBook(Book book) {
         if (book == null) {
             logger.warn("新增图书对象为空");
-            return false;
+            return;
         }
 
         logger.info("开始新增图书: {}", book);
@@ -127,7 +139,6 @@ public class BookServiceImpl implements BookService {
             } else {
                 logger.warn("图书添加失败");
             }
-            return rowsAffected;
         } catch (Exception e) {
             logger.error("添加图书失败", e);
             throw e;
@@ -163,9 +174,59 @@ public class BookServiceImpl implements BookService {
             throw e;
         }
     }
-
+    /**
+     * 根据ID查询图书信息
+     *
+     * @param bookId 图书ID
+     * @return 图书信息
+     * */
     @Override
     public Book findById(Integer bookId) {
         return bookMapper.findById(bookId);
+    }
+    /**
+     * 更新图书封面
+     *
+     * @param file 要上传的图片文件
+     * @param filename 文件名
+     * */
+
+    @Override
+    public String updateImage(MultipartFile file, String filename) {
+        try {
+            logger.info("开始上传封面: {}", filename);
+
+            // 文件类型检查
+            if (!isImageFile(file)) {
+                logger.warn("不允许的文件类型: {}", filename);
+                return null;
+            }
+
+            // 文件大小限制（5MB）
+            if (file.getSize() > 5 * 1024 * 1024) {
+                logger.warn("文件过大: {}", filename);
+                return null;
+            }
+
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 构建完整文件路径
+            Path filePath = uploadPath.resolve(filename);
+            logger.info("保存文件路径: {}", filePath);
+            // 保存文件
+            Files.write(filePath, file.getBytes());
+
+            String ImageUrl = accessDir+ "/" + filename;
+
+            logger.info("封面上传成功: {}", filename);
+            return ImageUrl;
+
+        } catch (IOException e) {
+            logger.error("上传封面失败: {}", filename, e);
+            return null;
+        }
     }
 }

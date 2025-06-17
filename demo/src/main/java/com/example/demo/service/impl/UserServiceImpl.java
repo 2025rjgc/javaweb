@@ -19,6 +19,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.example.demo.filter.FileTools.isImageFile;
+
 /**
  * 用户服务实现类，包含用户注册、登录、信息更新等业务逻辑。
  */
@@ -195,20 +197,6 @@ public class UserServiceImpl implements UserService {
             logger.error("上传头像失败: {}", filename, e);
             return false;
         }
-    }
-
-    /**
-     * 检查是否为图片文件。
-     *
-     * @param file 文件
-     * @return 是图片返回 true，否则 false
-     */
-    private boolean isImageFile(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
-        return originalFilename != null && (
-                originalFilename.toLowerCase().endsWith(".png") ||
-                        originalFilename.toLowerCase().endsWith(".jpg") ||
-                        originalFilename.toLowerCase().endsWith(".jpeg"));
     }
 
     /**

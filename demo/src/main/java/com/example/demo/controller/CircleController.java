@@ -30,7 +30,6 @@ public class CircleController {
         return Result.success(quanzi);
     }
     //  创建圈子
-
     @PostMapping
     public Result createCircle(@RequestBody Circle quanzi)
     {
@@ -48,7 +47,9 @@ public class CircleController {
     //查询圈子成员
     @GetMapping("/{id}/members")
     public Result getMembers(@PathVariable Integer id){
+        log.info("查询圈子成员：{}",id);
         List<Members> list = circleService.getMembers(id);
+        log.info("获取成员列表：{}",list);
         return Result.success(list);
     }
 

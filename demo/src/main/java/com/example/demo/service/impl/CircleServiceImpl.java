@@ -29,6 +29,15 @@ public class CircleServiceImpl implements CircleService {
     public Circle getInfo(Integer id) {
         return circleMapper.getInfo(id);
     }
+    //  删除圈子
+    @Override
+    public void deleteCircle(Integer id) {
+        //先删除用户圈子关系
+        circleMapper.deleteUserCircle(id);
+
+        //删除圈子以及帖子、评论
+        circleMapper.deleteCircle(id);
+    }
 
     //  创建圈子
     @Transactional //开启事务回滚
@@ -39,6 +48,7 @@ public class CircleServiceImpl implements CircleService {
         circle.setPosts(0);
         String  username=circle.getOwner();
         String  title=circle.getTitle();
+
         // 插入数据库
         circleMapper.createCircle(circle);
         // 更新导师的circle_id
@@ -53,12 +63,6 @@ public class CircleServiceImpl implements CircleService {
         }
     }
 
-    //  删除圈子
-    @Override
-    public void deleteCircle(Integer id) {
-    circleMapper.deleteCircle(id);
-    }
-
     //查询圈子成员
     @Override
     public List<Members> getMembers(Integer id) {
@@ -68,6 +72,7 @@ public class CircleServiceImpl implements CircleService {
     //查询可以邀请成员
     @Override
     public List<Members> getInvite(Integer id) {
+        // 根据圈子id查询没有加入圈子的成员
         return circleMapper.selectNoMembersList(id);
     }
     //邀请成员

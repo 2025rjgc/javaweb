@@ -19,4 +19,10 @@ public interface PostService {
 
     // 创建评论
     Comments createComment(Integer circleId, Integer postId, Comments comment);
+
+    // 删除帖子
+    void deletePost(Integer circleId, Integer postId);
+
+    // 删除评论
+    void deleteComment(Integer postId, Integer commentId);
 }

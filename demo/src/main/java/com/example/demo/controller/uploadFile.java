@@ -1,5 +1,5 @@
 package com.example.demo.controller;
-import com.example.demo.filter.GetContentType;
+import com.example.demo.filter.FileTools;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -28,12 +28,18 @@ public class uploadFile{
     @Value("${app.other-access-dir}")
     private String accessDir;
 
+    /**
+     * 上传图片
+     *
+     * @param file 图片文件名，包含文件扩展名
+     * @return 返回一个包含图片URL的JSON对象
+     */
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
+        log.info("file: {}", file);
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("文件为空，请选择一个文件上传。");
         }
-
         try {
             // 创建目标目录（如果不存在）
             Path uploadPath = Paths.get(uploadDir);
@@ -65,6 +71,12 @@ public class uploadFile{
         }
     }
 
+    /**
+     * 通过文件名获取图片
+     *
+     * @param fileName 图片文件名，包含文件扩展名
+     * @return 返回一个ResponseEntity对象，其中包含图片的字节数组和相关HTTP头信息
+     */
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
         try {
@@ -75,6 +87,7 @@ public class uploadFile{
                         .body("非法文件名".getBytes(StandardCharsets.UTF_8));
             }
 
+            // 构建图片的完整路径
             Path imagePath = Paths.get(uploadDir).resolve(fileName).normalize();
 
             // 确保解析后的路径在允许的目录下
@@ -84,15 +97,20 @@ public class uploadFile{
                         .body("不允许访问外部路径".getBytes(StandardCharsets.UTF_8));
             }
 
+            // 读取图片内容到字节数组
             byte[] imageBytes = Files.readAllBytes(imagePath);
-            String contentType = GetContentType.getContentTypeByExtension(fileName);
+            // 根据文件名获取内容类型
+            String contentType = FileTools.getContentTypeByExtension(fileName);
 
+            // 返回包含图片内容和HTTP头信息的ResponseEntity对象
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=\"" + fileName + "\"")
                     .body(imageBytes);
         } catch (IOException e) {
+            // 记录错误日志
             log.error("获取图片失败: {}", fileName, e);
+            // 返回错误信息
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.TEXT_PLAIN)
                     .body(e.getMessage().getBytes(StandardCharsets.UTF_8));

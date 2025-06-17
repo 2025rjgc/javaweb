@@ -20,9 +20,7 @@ public class Result{
     }
 
     public static Result success(Object data){
-        Result result = new Result();
-        result.code = "1";
-        result.message = "success";
+        Result result = success();
         result.data = data;
         return result;
     }

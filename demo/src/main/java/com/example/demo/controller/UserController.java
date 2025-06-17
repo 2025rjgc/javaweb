@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Result;
 import com.example.demo.entity.User;
-import com.example.demo.filter.GetContentType;
+import com.example.demo.filter.FileTools;
 import com.example.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +98,7 @@ public class UserController {
     @PostMapping("/updateUserInfo")
     public Result updateUserInfo(@RequestBody User user) {
         logger.info("修改用户信息: {}", user.getUsername());
+        logger.info("用户信息: {}", user);
         boolean success = userService.updateUserInfo(user);
         if (success) {
             return Result.success();
@@ -183,7 +184,7 @@ public class UserController {
             logger.info("获取用户头像: {}", fileName);
             byte[] imageBytes = userService.getUserImage(fileName);
 
-            String contentType = GetContentType.getContentTypeByExtension(fileName);
+            String contentType = FileTools.getContentTypeByExtension(fileName);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))

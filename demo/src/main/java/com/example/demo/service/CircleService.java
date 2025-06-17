@@ -29,4 +29,5 @@ public interface CircleService {
 
     // 邀请成员
     void inviteMember(Integer id,Members member);
+
 }

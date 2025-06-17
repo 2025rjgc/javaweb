@@ -6,6 +6,7 @@ import com.example.demo.entity.Post;
 import com.example.demo.mapper.CircleMapper;
 import com.example.demo.mapper.PostMapper;
 import com.example.demo.service.PostService;
+import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,19 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostMapper postMapper;
     @Autowired
-    private CircleMapper quanziMapper;
+    private CircleMapper circleMapper;
+    @Autowired
+    private UserService userService;
 
     // 获取某个圈子下的所有帖子
     @Override
     public List<Post> getPostsByCircleId(Integer circleId) {
-        return postMapper.selectPostsByCircleId(circleId);
+        List<Post> posts = postMapper.selectPostsByCircleId(circleId);
+        for (Post post : posts){
+            post.setAvatar(userService.findByName(post.getUsername()).getAvatar());
+        }
+        log.info("获取圈子下的所有帖子{}",posts);
+        return posts;
     }
 
     // 获取某条帖子的详细信息（含评论）
@@ -36,6 +44,7 @@ public class PostServiceImpl implements PostService {
         if (comment == null) {
             return post;
         }
+        post.setAvatar(userService.findByName(post.getUsername()).getAvatar());
         post.setComments(comment);
         return post;
     }
@@ -56,7 +65,7 @@ public class PostServiceImpl implements PostService {
         postMapper.insertPost(post);
 
         //创建帖子后，更新圈子的帖子数
-        quanziMapper.updatePosts(circleId);
+        circleMapper.updatePosts(circleId);
         return post;
     }
 
@@ -83,5 +92,18 @@ public class PostServiceImpl implements PostService {
         postMapper.insertComment(comment);
 
         return comment;
+    }
+    // 删除帖子
+    @Override
+    public void deletePost(Integer circleId, Integer postId) {
+        log.info("删除帖子,circleId: {}, postId: {}", circleId, postId);
+        postMapper.deleteCommentByPostId(postId);
+        postMapper.deletePostsByCircleId(circleId, postId);
+    }
+
+    // 删除评论
+    @Override
+    public void deleteComment(Integer postId, Integer commentId) {
+        postMapper.deleteComment(postId, commentId);
     }
 }

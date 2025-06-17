@@ -54,4 +54,18 @@ public class PostController {
         log.info("createdComment: {}", createdComment);
         return Result.success();
     }
+    //删除帖子以及评论
+    @DeleteMapping("/{circleId}/posts/{postId}")
+    public Result deletePost(@PathVariable Integer circleId, @PathVariable Integer postId) {
+        log.info("删除帖子,circleId: {}, postId: {}", circleId, postId);
+        postService.deletePost(circleId, postId);
+        return Result.success();
+    }
+    // 删除评论
+    @DeleteMapping("/{circleId}/posts/{postId}/comments/{commentId}")
+    public Result deleteComment(@PathVariable Integer circleId, @PathVariable Integer postId, @PathVariable Integer commentId) {
+        log.info("删除评论,circleId: {}, postId: {}, commentId: {}", circleId, postId, commentId);
+        postService.deleteComment(postId, commentId);
+        return Result.success();
+    }
 }
