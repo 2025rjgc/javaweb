@@ -37,22 +37,36 @@ public interface CircleMapper {
     List<Members> selectMembersList(Integer id);
 
     //查询可邀请成员
-    @Select("select user_id as userId,username from user where (circle_id is null or circle_id != #{id}) and role=0")
+    @Select("select user_id as userId,username,avatar from user where (circle_id is null or circle_id != #{id}) and role=0")
     List<Members> selectNoMembersList(Integer id);
 
     //邀请成员,更改用户的circle_id
     @Update("update user set circle_id = #{id} where user_id = #{userId}")
     void inviteMember(@Param("id") Integer id,@Param("userId") Integer userId);
 
-    //更新圈子内帖子数
-    @Update("update circles set posts = posts + 1 where id = #{circleId}")
-    void updatePosts(Integer circleId);
+    // 更新圈子内的帖子数
+    @Select("SELECT COUNT(*) FROM circle_posts WHERE circle_id = #{circleId}")
+    int countPostsByCircleId(Integer circleId);
 
-    //更新圈子内成员数
-    @Update("update circles set members = members + 1 where id = #{id}")
-    void updateMember(Integer id);
+    @Update("UPDATE circles SET posts = #{count} WHERE id = #{circleId}")
+    void updatePosts(@Param("circleId") Integer circleId,@Param("count") int count);
+
+    // 更新圈子内的成员数
+    @Select("SELECT COUNT(*) FROM user WHERE circle_id = #{id}")
+    int countMembersByCircleId(Integer id);
+
+    @Update("UPDATE circles SET members = #{count} WHERE id = #{id}")
+    void updateMembers(@Param("id") Integer id,@Param("count") int count);
 
     //查询圈子id
     @Select("select id from circles where owner = #{username} and title = #{title}")
     Integer selectId(@Param("username") String username,@Param("title") String title);
+
+    // 删除成员
+    @Update("update user set circle_id = null where user_id = #{userId}")
+    void deleteMember(@Param("userId") Integer userId);
+
+    //根据用户id查询所有圈子
+    @Select("select * from circles,user where circles.id = user.circle_id and user.user_id = #{userId}")
+    List<Circle> selectCircleByUserId(Integer userId);
 }

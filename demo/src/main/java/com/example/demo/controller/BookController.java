@@ -43,7 +43,6 @@ public class BookController {
      */
     @GetMapping("")
     public Result list() {
-        logger.info("获取所有图书信息");
         List<Book> books = bookService.FindAll();
         return Result.success(books);
     }
@@ -56,7 +55,6 @@ public class BookController {
      */
     @PostMapping("/search")
     public Result search(@RequestBody Book book) {
-        logger.info("多条件查询图书: {}", book);
         List<Book> books = bookService.search(book);
         return Result.success(books);
     }
@@ -69,7 +67,7 @@ public class BookController {
      */
     @DeleteMapping("/{id}")
     public Result delete(@PathVariable String id) {
-        logger.info("尝试删除图书 ID: {}", id);
+        logger.debug("尝试删除图书 ID: {}", id);
         if (id == null || id.isEmpty()) {
             logger.warn("无效的图书ID");
             return Result.error("图书ID不能为空");
@@ -91,7 +89,7 @@ public class BookController {
      */
     @PostMapping("/add")
     public Result addBook(@RequestBody Book book) {
-        logger.info("添加新图书: {}", book);
+        logger.debug("添加新图书: {}", book);
         if (book == null) {
             logger.warn("图书对象为空");
             return Result.error("图书信息不能为空");
@@ -112,7 +110,7 @@ public class BookController {
     * */
     @GetMapping("/getBookDetail")
     public Result getBookDetail(@RequestParam("bookId") Integer bookId) {
-        logger.info("获取图书详情: {}", bookId);
+        logger.debug("获取图书详情: {}", bookId);
         Book book = bookService.findById(bookId);
         return book != null ? Result.success(book) : Result.error("图书不存在");
     }
@@ -125,7 +123,7 @@ public class BookController {
      */
     @PostMapping("")
     public Result update(@RequestBody Book book) {
-        logger.info("更新图书信息: {}", book);
+        logger.debug("更新图书信息: {}", book);
         if (book == null || book.getBookId() == null) {
             logger.warn("图书ID为空");
             return Result.error("图书ID不能为空");
@@ -149,7 +147,7 @@ public class BookController {
     public Result setImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam("filename") String filename) {
-        logger.info("设置图书封面: {}", filename);
+        logger.debug("设置图书封面: {}", filename);
 
         if (file.isEmpty()) {
             logger.warn("上传文件为空");
@@ -182,7 +180,7 @@ public class BookController {
             logger.error("上传图片失败: {}", filename);
             return Result.error("上传失败");
         }
-        logger.info("上传成功: {}", ImageUrl);
+        logger.debug("上传成功: {}", ImageUrl);
         return Result.success(ImageUrl);
     }
 
@@ -215,8 +213,8 @@ public class BookController {
                         .body("无权访问该文件".getBytes(StandardCharsets.UTF_8));
             }
 
-            logger.info("获取图书封面图片: {}", fileName);
-            logger.info("图片路径: {}", imagePath);
+            logger.debug("获取图书封面图片: {}", fileName);
+            logger.debug("图片路径: {}", imagePath);
 
             if (!Files.exists(imagePath)) {
                 logger.warn("图片文件不存在: {}", imagePath);

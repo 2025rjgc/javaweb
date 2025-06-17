@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Result;
 import com.example.demo.entity.User;
-import com.example.demo.filter.FileTools;
+import com.example.demo.utils.FileTools;
 import com.example.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +40,10 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result login(String username, String password) {
-        logger.info("用户尝试登录: {}", username);
+        logger.debug("用户尝试登录: {}", username);
         Object login_data = userService.login(username, password);
         if (login_data != null) {
-            logger.info("登录成功: {}", username);
+            logger.debug("登录成功: {}", username);
             return Result.success(login_data);
         } else {
             logger.warn("用户名或密码错误: {}", username);
@@ -59,10 +59,10 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result register(@RequestBody User user) {
-        logger.info("开始注册用户: {}", user.getUsername());
+        logger.debug("开始注册用户: {}", user.getUsername());
         Object register_data = userService.register(user);
         if (register_data != null) {
-            logger.info("注册成功: {}", user.getUsername());
+            logger.debug("注册成功: {}", user.getUsername());
             return Result.success(register_data);
         } else {
             logger.warn("注册失败: {}", user.getUsername());
@@ -78,10 +78,10 @@ public class UserController {
      */
     @PostMapping("/getUserInfo")
     public Result getAllUserInfo(@RequestBody User user) {
-        logger.info("根据条件查询用户信息: {}", user);
+        logger.debug("根据条件查询用户信息: {}", user);
         List<User> userList = userService.getUserInfo(user);
         if (userList != null && !userList.isEmpty()) {
-            logger.info("查询成功: {}", userList);
+            logger.debug("查询成功: {}", userList);
             return Result.success(userList);
         } else {
             logger.warn("未找到符合条件的用户: {}", user);
@@ -97,8 +97,8 @@ public class UserController {
      */
     @PostMapping("/updateUserInfo")
     public Result updateUserInfo(@RequestBody User user) {
-        logger.info("修改用户信息: {}", user.getUsername());
-        logger.info("用户信息: {}", user);
+        logger.debug("修改用户信息: {}", user.getUsername());
+        logger.debug("用户信息: {}", user);
         boolean success = userService.updateUserInfo(user);
         if (success) {
             return Result.success();
@@ -116,7 +116,7 @@ public class UserController {
      */
     @PostMapping("/deleteUser")
     public Result deleteUser(String username) {
-        logger.info("删除用户: {}", username);
+        logger.debug("删除用户: {}", username);
         boolean success = userService.deleteUser(username);
         if (success) {
             return Result.success();
@@ -137,7 +137,7 @@ public class UserController {
     public Result setImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam("filename") String filename) {
-        logger.info("设置用户头像: {}", filename);
+        logger.debug("设置用户头像: {}", filename);
 
         if (file.isEmpty()) {
             logger.warn("上传文件为空");
@@ -181,7 +181,7 @@ public class UserController {
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
         try {
-            logger.info("获取用户头像: {}", fileName);
+            logger.debug("获取用户头像: {}", fileName);
             byte[] imageBytes = userService.getUserImage(fileName);
 
             String contentType = FileTools.getContentTypeByExtension(fileName);

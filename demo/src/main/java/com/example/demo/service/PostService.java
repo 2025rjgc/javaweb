@@ -18,7 +18,7 @@ public interface PostService {
     Post createPost(Integer circleId, Post post);
 
     // 创建评论
-    Comments createComment(Integer circleId, Integer postId, Comments comment);
+    Comments createComment(Integer circleId, Integer postId,Integer userId,Comments comment);
 
     // 删除帖子
     void deletePost(Integer circleId, Integer postId);

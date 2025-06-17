@@ -29,9 +29,10 @@ public class PostServiceImpl implements PostService {
     public List<Post> getPostsByCircleId(Integer circleId) {
         List<Post> posts = postMapper.selectPostsByCircleId(circleId);
         for (Post post : posts){
+            log.debug("获取圈子下的所有帖子{}",post);
             post.setAvatar(userService.findByName(post.getUsername()).getAvatar());
         }
-        log.info("获取圈子下的所有帖子{}",posts);
+        log.debug("获取圈子下的所有帖子{}",posts);
         return posts;
     }
 
@@ -65,13 +66,15 @@ public class PostServiceImpl implements PostService {
         postMapper.insertPost(post);
 
         //创建帖子后，更新圈子的帖子数
-        circleMapper.updatePosts(circleId);
+        int postCount = circleMapper.countPostsByCircleId(circleId);
+        circleMapper.updatePosts(circleId, postCount);
+        log.debug("刷新圈子 {} 的帖子计数为 {}", circleId, postCount);
         return post;
     }
 
     // 创建评论
     @Override
-    public Comments createComment(Integer circleId, Integer postId, Comments comment) {
+    public Comments createComment(Integer circleId, Integer postId, Integer userId,Comments comment) {
         Post post = postMapper.selectPostById(circleId, postId);
         //  判断帖子是否存在
         if (post == null) {
@@ -86,6 +89,7 @@ public class PostServiceImpl implements PostService {
         // 直接获取当前时间，无需格式化再解析
         LocalDateTime currentTime = LocalDateTime.now();
 
+        comment.setUsername(userService.findById(userId).getUsername());
         comment.setPostId(postId);// 设置所属帖子ID
         comment.setCommentTime(currentTime);//  设置发布时间
 
@@ -96,9 +100,14 @@ public class PostServiceImpl implements PostService {
     // 删除帖子
     @Override
     public void deletePost(Integer circleId, Integer postId) {
-        log.info("删除帖子,circleId: {}, postId: {}", circleId, postId);
+        log.debug("删除帖子,circleId: {}, postId: {}", circleId, postId);
         postMapper.deleteCommentByPostId(postId);
         postMapper.deletePostsByCircleId(circleId, postId);
+
+        // 更新圈子的帖子数
+        int postCount = circleMapper.countPostsByCircleId(circleId);
+        circleMapper.updatePosts(circleId, postCount);
+        log.debug("圈子{}的帖子计数为 {}", circleId, postCount);
     }
 
     // 删除评论

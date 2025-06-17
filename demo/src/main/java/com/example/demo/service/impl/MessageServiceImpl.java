@@ -1,31 +1,24 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.Book;
 import com.example.demo.entity.Message;
-import com.example.demo.entity.User;
 import com.example.demo.mapper.CircleMapper;
 import com.example.demo.mapper.MessageMapper;
 import com.example.demo.service.BookService;
 import com.example.demo.service.MessageService;
 import com.example.demo.service.UserService;
 import com.example.demo.view.MessageView;
-import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 新增事务管理
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 消息服务实现类
  */
 @Service
 public class MessageServiceImpl implements MessageService {
-    private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
     private final UserService userService;
     private final CircleMapper circleMapper;
@@ -51,13 +44,11 @@ public class MessageServiceImpl implements MessageService {
             // 获取用户信息-圈子id
             Integer circleId = userService.findById(userId).getCircleId();
             if (circleId == null) {
-                logger.warn("用户 {} 没有加入圈子", userId);
                 return List.of(); // 没有圈子，返回空
             }
             // 获取圈子信息-导师用户名
             String owner = circleMapper.getInfo(circleId).getOwner();
             if (owner == null) {
-                logger.warn("圈子 {} 不存在", circleId);
                 return List.of(); // 圈子不存在，返回空
             }
             // 获取导师用户ID
@@ -79,7 +70,6 @@ public class MessageServiceImpl implements MessageService {
             }
             return messageViews;
         } catch (Exception e) {
-            logger.error("获取用户 {} 消息时发生异常: {}", userId, e.getMessage(), e);
             throw new RuntimeException("获取消息失败", e);
         }
     }
@@ -94,7 +84,6 @@ public class MessageServiceImpl implements MessageService {
         try {
             messageMapper.newMessage(message);
         } catch (Exception e) {
-            logger.error("新增消息时发生异常: {}", e.getMessage(), e);
             throw new RuntimeException("新增消息失败", e);
         }
     }
@@ -109,7 +98,6 @@ public class MessageServiceImpl implements MessageService {
         try {
             messageMapper.deleteMessage(messageId);
         } catch (Exception e) {
-            logger.error("删除消息时发生异常: {}", e.getMessage(), e);
             throw new RuntimeException("删除消息失败", e);
         }
     }
@@ -124,7 +112,6 @@ public class MessageServiceImpl implements MessageService {
         try {
             messageMapper.updateMessage(message);
         } catch (Exception e) {
-            logger.error("更新消息时发生异常: {}", e.getMessage(), e);
             throw new RuntimeException("更新消息失败", e);
         }
     }
@@ -141,7 +128,6 @@ public class MessageServiceImpl implements MessageService {
         try {
             return messageMapper.searchMessages(userId, bookId, text);
         } catch (Exception e) {
-            logger.error("多条件查询消息时发生异常: {}", e.getMessage(), e);
             throw new RuntimeException("多条件查询消息失败", e);
         }
     }

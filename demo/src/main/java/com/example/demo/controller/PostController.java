@@ -28,7 +28,7 @@ public class PostController {
     // 获取某条帖子的详细信息（含评论）
     @GetMapping("/{circleId}/post/{postId}")
     public Result getPostById(@PathVariable Integer circleId, @PathVariable Integer postId) {
-        log.info("circleId: {}, postId: {}", circleId, postId);
+        log.debug("circleId: {}, postId: {}", circleId, postId);
         Post post = postService.getPostById(circleId, postId);
 
         //  判断帖子是否存在
@@ -42,14 +42,16 @@ public class PostController {
     @PostMapping("/{circleId}/posts")
     public Result createPost(@PathVariable Integer circleId, @RequestBody Post post) {
         Post createdPost = postService.createPost(circleId, post);
-        //后端打印信息
-        log.info("createdPost: {}", createdPost);
+        log.debug("createdPost: {}", createdPost);
         return Result.success();
     }
     //发评论
-    @PostMapping("/{circleId}/posts/{postId}/comments")
-    public Result createComment(@PathVariable Integer circleId, @PathVariable Integer postId, @RequestBody Comments comment) {
-        Comments createdComment = postService.createComment(circleId, postId, comment);
+    @PostMapping("/{circleId}/posts/{postId}/comments/{userId}")
+    public Result createComment(@PathVariable Integer circleId,
+                                @PathVariable Integer postId,
+                                @PathVariable Integer userId,
+                                @RequestBody Comments comment) {
+        Comments createdComment = postService.createComment(circleId, postId, userId, comment);
         //后端打印信息
         log.info("createdComment: {}", createdComment);
         return Result.success();

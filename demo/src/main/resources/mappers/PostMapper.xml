@@ -5,14 +5,16 @@
 <mapper namespace="com.example.demo.mapper.PostMapper">
     <!-- 插入新帖子 -->
     <insert id="insertPost" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO circle_posts (circle_id, username, avatar, content, post_time)
+        INSERT INTO circle_posts (circle_id, username, title, book_name, avatar, content, post_time)
         VALUES (
-                   #{circleId},
-                   #{username},
-                   #{avatar},
-                   #{content},
-                   NOW()
-               )
+            #{circleId},
+            #{username},
+            #{title},
+            #{bookName},
+            #{avatar},
+            #{content},
+            NOW()
+            )
     </insert>
 
     <!-- 插入新评论 -->
@@ -28,14 +30,14 @@
 
     <!-- 获取某个圈子下的所有帖子 -->
     <select id="selectPostsByCircleId" resultType="com.example.demo.entity.Post">
-        SELECT id, circle_id AS circleId, username, avatar, content, post_time
+        SELECT id, circle_id AS circleId, username, title, book_name AS bookName,avatar, content, post_time
         FROM circle_posts
         WHERE circle_id = #{circleId}
     </select>
 
     <!-- 获取某条帖子的详细信息（含评论） -->
     <select id="selectPostById" resultType="com.example.demo.entity.Post">
-        SELECT id, circle_id AS circleId, username, avatar, content, post_time as postTime
+        SELECT id, circle_id AS circleId, username, title, book_name AS bookName, avatar, content, post_time as postTime
         FROM circle_posts
         WHERE circle_id = #{circleId} AND id = #{postId}
     </select>

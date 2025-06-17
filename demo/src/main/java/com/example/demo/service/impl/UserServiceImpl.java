@@ -16,10 +16,8 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static com.example.demo.filter.FileTools.isImageFile;
+import static com.example.demo.utils.FileTools.isImageFile;
 
 /**
  * 用户服务实现类，包含用户注册、登录、信息更新等业务逻辑。
@@ -27,7 +25,6 @@ import static com.example.demo.filter.FileTools.isImageFile;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     // 注入上传目录路径（application.yml 配置）
     @Value("${app.userImg-upload-dir}")
@@ -52,11 +49,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Object login(String username, String password) {
-        logger.info("用户尝试登录: {}", username);
 
         List<User> userData = userMapper.findByUsernameAndPassword(username, password);
         if (userData.isEmpty()) {
-            logger.warn("用户名或密码错误: {}", username);
             return null;
         }
 
@@ -69,7 +64,6 @@ public class UserServiceImpl implements UserService {
         map.put("role", user.getRole());
         map.put("token", JWT_token);
 
-        logger.info("用户登录成功: {}", username);
         return map;
     }
 
@@ -82,15 +76,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Object register(User user) {
-        logger.info("开始注册用户");
 
         if (!StringUtils.hasText(user.getUsername()) || !StringUtils.hasText(user.getPassword())) {
-            logger.warn("用户名或密码为空");
             return null;
         }
 
         if (!userMapper.find(user).isEmpty()) {
-            logger.warn("用户已存在: {}", user.getUsername());
             return null;
         }
 
@@ -102,7 +93,6 @@ public class UserServiceImpl implements UserService {
         map.put("userId", user.getUserId());
         map.put("username", user.getUsername());
 
-        logger.info("用户注册成功: {}", user.getUsername());
         return map;
     }
 
@@ -113,7 +103,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getAllUserInfo() {
-        logger.info("获取所有用户信息");
         return userMapper.findAll();
     }
 
@@ -126,7 +115,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean updateUserInfo(User user) {
-        logger.info("更新用户信息: {}", user);
         int rowsAffected = userMapper.updateUserInfo(user);
         return rowsAffected > 0;
     }
@@ -140,7 +128,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean deleteUser(String username) {
-        logger.info("删除用户: {}", username);
         int rowsAffected = userMapper.deleteUser(username);
         return rowsAffected > 0;
     }
@@ -156,17 +143,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean updateUserImage(MultipartFile file, String filename) {
         try {
-            logger.info("开始上传头像: {}", filename);
 
             // 文件类型检查
             if (!isImageFile(file)) {
-                logger.warn("不允许的文件类型: {}", filename);
                 return false;
             }
 
             // 文件大小限制（5MB）
             if (file.getSize() > 5 * 1024 * 1024) {
-                logger.warn("文件过大: {}", filename);
                 return false;
             }
 
@@ -180,7 +164,6 @@ public class UserServiceImpl implements UserService {
 
             // 构建完整文件路径
             Path filePath = uploadPath.resolve(filename);
-            logger.info("保存文件路径: {}", filePath);
             // 保存文件
             Files.write(filePath, file.getBytes());
 
@@ -190,11 +173,9 @@ public class UserServiceImpl implements UserService {
             user.setAvatar(accessDir + "/" + filename);
             userMapper.updateUserInfo(user);
 
-            logger.info("头像上传成功: {}", filename);
             return true;
 
         } catch (IOException e) {
-            logger.error("上传头像失败: {}", filename, e);
             return false;
         }
     }
@@ -208,11 +189,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public byte[] getUserImage(String fileName) throws IOException {
-        logger.info("获取用户头像: {}", fileName);
         Path imagePath = Paths.get(uploadDir, fileName);
-        logger.info("图片路径: {}", imagePath);
         if (!Files.exists(imagePath)) {
-            logger.warn("文件不存在: {}", fileName);
             throw new IOException("文件不存在: " + fileName);
         }
         return Files.readAllBytes(imagePath);
@@ -226,7 +204,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getUserInfo(User user) {
-        logger.info("根据条件查询用户信息");
         return userMapper.find(user);
     }
 

@@ -5,14 +5,12 @@ import com.example.demo.entity.Circle;
 import com.example.demo.entity.Members;
 import com.example.demo.mapper.CircleMapper;
 import com.example.demo.service.CircleService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Service
 public class CircleServiceImpl implements CircleService {
     @Autowired
@@ -29,6 +27,13 @@ public class CircleServiceImpl implements CircleService {
     public Circle getInfo(Integer id) {
         return circleMapper.getInfo(id);
     }
+
+    // 根据用户id查询圈子信息
+    @Override
+    public List<Circle> selectCircleByUserId(Integer userId) {
+        return circleMapper.selectCircleByUserId(userId);
+    }
+
     //  删除圈子
     @Override
     public void deleteCircle(Integer id) {
@@ -54,7 +59,6 @@ public class CircleServiceImpl implements CircleService {
         // 更新导师的circle_id
         Integer circle_id = circleMapper.selectId(username, title);
         if (circle_id == null || username.isEmpty()){
-            log.error("不存在{},{}",username,circle_id);
             throw new RuntimeException("用户不存在");
         }
         int rowsAffected = circleMapper.updateUserCircleId(circle_id, username);
@@ -80,7 +84,16 @@ public class CircleServiceImpl implements CircleService {
     public void inviteMember(Integer id,  Members member) {
         Integer userId=member.getUserId();
         circleMapper.inviteMember(id,userId);
-        circleMapper.updateMember(id);
+        int memberCount = circleMapper.countMembersByCircleId(id);
+        circleMapper.updateMembers(id, memberCount);
+    }
+
+    //删除成员
+    @Override
+    public void deleteMember(Integer userId) {
+        circleMapper.deleteMember(userId);
+        int memberCount = circleMapper.countMembersByCircleId(userId);
+        circleMapper.updateMembers(userId, memberCount);
     }
 
 }

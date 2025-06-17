@@ -30,4 +30,9 @@ public interface CircleService {
     // 邀请成员
     void inviteMember(Integer id,Members member);
 
+    // 删除成员
+    void deleteMember(Integer userId);
+
+    // 根据用户id获取圈子列表
+    List<Circle> selectCircleByUserId(Integer userId);
 }
